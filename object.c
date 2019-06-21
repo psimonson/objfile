@@ -4,8 +4,8 @@
 
 #include <GL/gl.h>
 
-#include "vector.h"
 #include "object.h"
+#include "vector.h"
 #include "file.h"
 #include "unused.h"
 
@@ -28,34 +28,24 @@ struct objfile *load_object(const char *filename)
 	}
 	obj = (struct objfile*)malloc(sizeof(struct objfile));
 	if(!obj) return NULL;
-	obj->vertices = NULL;
-	obj->normals = NULL;
-	obj->faces = NULL;
+	obj->v = NULL;
+	obj->vn = NULL;
+	obj->f = NULL;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "v")) {
-			float v1, v2, v3;
-			readf_file(&file, "%f %f %f", &v1, &v2, &v3);
-			vector_push_back(obj->vertices, v1);
-			vector_push_back(obj->vertices, v2);
-			vector_push_back(obj->vertices, v3);
+			struct vec3 v;
+			readf_file(&file, "%f %f %f", &v.x, &v.y, &v.z);
+			vector_push_back(obj->v, v);
 		} else if(!strcmp(buf, "vn")) {
-			float v1, v2, v3;
-			readf_file(&file, "%f %f %f", &v1, &v2, &v3);
-			vector_push_back(obj->normals, v1);
-			vector_push_back(obj->normals, v2);
-			vector_push_back(obj->normals, v3);
+			struct vec3 v;
+			readf_file(&file, "%f %f %f", &v.x, &v.y, &v.z);
+			vector_push_back(obj->vn, v);
 		} else if(!strcmp(buf, "f")) {
-			int v1, v2, v3, v4, v5, v6, v7, v8;
+			struct face f;
 			readf_file(&file, "%d//%d %d//%d %d//%d %d//%d",
-				&v1, &v2, &v3, &v4, &v5, &v6, &v7, &v8);
-			vector_push_back(obj->faces, v1);
-			vector_push_back(obj->faces, v2);
-			vector_push_back(obj->faces, v3);
-			vector_push_back(obj->faces, v4);
-			vector_push_back(obj->faces, v5);
-			vector_push_back(obj->faces, v6);
-			vector_push_back(obj->faces, v7);
-			vector_push_back(obj->faces, v8);
+				&f.f1, &f.f2, &f.f3, &f.f4,
+				&f.f5, &f.f6, &f.f7, &f.f8);
+			vector_push_back(obj->f, f);
 		}
 	}
 	close_file(&file);
@@ -77,22 +67,22 @@ void print_object(struct objfile *obj)
 	printf("Below is all the data... (Vertices, Normals, Faces).\n"
 		"In that order.\n"
 		"=====================================================\n");
-	for(i=0; i < vector_size(obj->vertices); i+=3) {
-		printf("%f %f %f\n", obj->vertices[i],
-			obj->vertices[i+1], obj->vertices[i+2]);
+	for(i=0; i < vector_size(obj->v); i++) {
+		printf("%f %f %f\n", obj->v[i].x,
+			obj->v[i].y, obj->v[i].z);
 	}
 	printf("=====================================================\n");
-	for(i=0; i < vector_size(obj->normals); i+=3) {
-		printf("%f %f %f\n", obj->normals[i],
-			obj->normals[i+1], obj->normals[i+2]);
+	for(i=0; i < vector_size(obj->vn); i++) {
+		printf("%f %f %f\n", obj->vn[i].x,
+			obj->vn[i].y, obj->vn[i].z);
 	}
 	printf("=====================================================\n");
-	for(i=0; i < vector_size(obj->faces); i+=8) {
-		printf("%d//%d %d//%d %d//%d %d//%d\n", obj->faces[i],
-			obj->faces[i+1], obj->faces[i+2],
-			obj->faces[i+3], obj->faces[i+4],
-			obj->faces[i+5], obj->faces[i+6],
-			obj->faces[i+7]);
+	for(i=0; i < vector_size(obj->f); i++) {
+		printf("%d//%d %d//%d %d//%d %d//%d\n",
+			obj->f[i].f1, obj->f[i].f2,
+			obj->f[i].f3, obj->f[i].f4,
+			obj->f[i].f5, obj->f[i].f6,
+			obj->f[i].f7, obj->f[i].f8);
 	}
 }
 /**
@@ -100,9 +90,9 @@ void print_object(struct objfile *obj)
  */
 void destroy_object(struct objfile *obj)
 {
-	vector_free(obj->vertices);
-	vector_free(obj->normals);
-	vector_free(obj->faces);
+	vector_free(obj->v);
+	vector_free(obj->vn);
+	vector_free(obj->f);
 	memset(obj, 0, sizeof(struct objfile));
 	free(obj);
 }
