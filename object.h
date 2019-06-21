@@ -22,6 +22,7 @@ struct objfile {
 	char name[64];
 	vector_t vertices;
 	vector_t normals;
+	vector_t faces;
 };
 
 PRS_EXPORT struct objfile *load_object(const char*);
