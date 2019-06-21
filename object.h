@@ -12,7 +12,6 @@
 #define PRS_OBJECT_H
 
 #include "export.h"
-#include "vector.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,9 +19,9 @@ extern "C" {
 
 struct objfile {
 	char name[64];
-	vector_t vertices;
-	vector_t normals;
-	vector_t faces;
+	float *vertices;
+	float *normals;
+	int *faces;
 };
 
 PRS_EXPORT struct objfile *load_object(const char*);
