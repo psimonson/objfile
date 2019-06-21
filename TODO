@@ -1,0 +1,11 @@
+=============================================
+             .:[OBJFILE v0.1]:.
+=============================================
+ * Basic setup of universal dynamic array.
+ - Grow array when full.
+=============================================
+NOTE: An '*' character means that it's done
+and '-' character means, "needs to be done".
+=============================================
+                 .:[EOF]:.
+=============================================
