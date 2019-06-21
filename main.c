@@ -37,10 +37,9 @@ void render_scene(void)
 	gluLookAt(0.0f, 0.0f, 10.0f,
 		0.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f);
-	
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(vector_size(obj->vertices), GL_FLOAT, 0, obj->vertices);
-	glDisableClientState(GL_VERTEX_ARRAY);
+
+	/* draw object */
+	draw_object(obj);
 
 	glutSwapBuffers();
 }

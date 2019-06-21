@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <GL/gl.h>
+
 #include "vector.h"
 #include "object.h"
 #include "file.h"
@@ -60,6 +62,26 @@ struct objfile *load_object(const char *filename)
 	return obj;
 }
 /**
+ * @brief Draw object to screen.
+ */
+void draw_object(struct objfile *obj)
+{
+	size_t i;
+
+	glBegin(GL_QUADS);
+	for(i=0; i < vector_size(obj->vertices); i+=3) {
+		glVertex3f(obj->vertices[i], obj->vertices[i+1],
+			obj->vertices[i+2]);
+	}
+	glEnd();
+	glBegin(GL_QUADS);
+	for(i=0; i < vector_size(obj->vertices); i+=3) {
+		glVertex3f(obj->normals[i], obj->normals[i+1],
+			obj->normals[i+2]);
+	}
+	glEnd();
+}
+/**
  * @brief Print object data.
  */
 void print_object(struct objfile *obj)
@@ -73,9 +95,9 @@ void print_object(struct objfile *obj)
 			obj->vertices[i+1], obj->vertices[i+2]);
 	}
 	printf("=====================================================\n");
-	for(i=0; i < vector_size(obj->vertices); i+=3) {
-		printf("%f %f %f\n", obj->vertices[i],
-			obj->vertices[i+1], obj->vertices[i+2]);
+	for(i=0; i < vector_size(obj->normals); i+=3) {
+		printf("%f %f %f\n", obj->normals[i],
+			obj->normals[i+1], obj->normals[i+2]);
 	}
 	printf("=====================================================\n");
 	for(i=0; i < vector_size(obj->faces); i+=8) {
