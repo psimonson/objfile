@@ -24,10 +24,15 @@ struct vec3 {
 };
 
 struct face {
-	int f1, f2;
-	int f3, f4;
-	int f5, f6;
-	int f7, f8;
+	int facenum;
+	char four;
+	char unused[3];
+	struct {
+		int f1, f2;
+		int f3, f4;
+		int f5, f6;
+		int f7, f8;
+	} face;
 };
 
 struct objfile {
@@ -35,9 +40,6 @@ struct objfile {
 	struct vec3 *v;
 	struct vec3 *vn;
 	struct face *f;
-	int facenum;
-	char four;
-	char unused[3];
 };
 
 PRS_EXPORT struct objfile *load_object(const char*);

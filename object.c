@@ -43,8 +43,9 @@ struct objfile *load_object(const char *filename)
 		} else if(!strcmp(buf, "f")) {
 			struct face f;
 			readf_file(&file, "%d//%d %d//%d %d//%d %d//%d",
-				&f.f1, &f.f2, &f.f3, &f.f4,
-				&f.f5, &f.f6, &f.f7, &f.f8);
+				&f.face.f1, &f.face.f2, &f.face.f3,
+				&f.face.f4, &f.face.f5, &f.face.f6,
+				&f.face.f7, &f.face.f8);
 			vector_push_back(obj->f, f);
 		}
 	}
@@ -79,10 +80,10 @@ void print_object(struct objfile *obj)
 	printf("=====================================================\n");
 	for(i=0; i < vector_size(obj->f); i++) {
 		printf("%d//%d %d//%d %d//%d %d//%d\n",
-			obj->f[i].f1, obj->f[i].f2,
-			obj->f[i].f3, obj->f[i].f4,
-			obj->f[i].f5, obj->f[i].f6,
-			obj->f[i].f7, obj->f[i].f8);
+			obj->f[i].face.f1, obj->f[i].face.f2,
+			obj->f[i].face.f3, obj->f[i].face.f4,
+			obj->f[i].face.f5, obj->f[i].face.f6,
+			obj->f[i].face.f7, obj->f[i].face.f8);
 	}
 }
 /**
