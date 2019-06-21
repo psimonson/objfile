@@ -19,6 +19,7 @@ void change_size(int w, int h)
 
 	ratio = 1.0*w/h;
 
+	glClearColor(0.0f, 0.0f, 0.7f, 1.0f);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glViewport(0, 0, w, h);
@@ -30,7 +31,6 @@ void render_scene(void)
 {
 	extern struct objfile *obj;
 
-	glClearColor(0.0f, 0.0f, 0.7f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
