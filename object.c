@@ -66,20 +66,7 @@ struct objfile *load_object(const char *filename)
  */
 void draw_object(struct objfile *obj)
 {
-	size_t i;
-
-	glBegin(GL_QUADS);
-	for(i=0; i < vector_size(obj->vertices); i+=3) {
-		glVertex3f(obj->vertices[i], obj->vertices[i+1],
-			obj->vertices[i+2]);
-	}
-	glEnd();
-	glBegin(GL_QUADS);
-	for(i=0; i < vector_size(obj->vertices); i+=3) {
-		glVertex3f(obj->normals[i], obj->normals[i+1],
-			obj->normals[i+2]);
-	}
-	glEnd();
+	UNUSED(obj);
 }
 /**
  * @brief Print object data.
