@@ -10,12 +10,34 @@
 
 static struct objfile *obj;
 
+void change_size(int w, int h)
+{
+	float ratio;
+
+	if(h == 0)
+		h = 1;
+
+	ratio = 1.0*w/h;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glViewport(0, 0, w, h);
+	gluPerspective(45, ratio, 1, 100);
+	glMatrixMode(GL_MODELVIEW);
+}
+
 void render_scene(void)
 {
 	extern struct objfile *obj;
 
+	glClearColor(0.0f, 0.0f, 0.7f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+	glLoadIdentity();
 
+	gluLookAt(0.0f, 0.0f, 10.0f,
+		0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f);
+	
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(vector_size(obj->vertices), GL_FLOAT, 0, obj->vertices);
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -31,6 +53,8 @@ int init_glut(int argc, char **argv)
 	glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
 	if(!glutCreateWindow("OBJFILE v0.01")) return 1;
 	glutDisplayFunc(render_scene);
+	glutIdleFunc(render_scene);
+	glutReshapeFunc(change_size);
 	return 0;
 }
 
@@ -43,6 +67,7 @@ int main(int argc, char **argv)
 
 	obj = load_object("test.obj");
 	if(!obj) return 1;
+	print_object(obj);
 	glutMainLoop();
 	destroy_object(obj);
 	return 0;
