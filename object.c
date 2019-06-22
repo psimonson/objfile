@@ -94,32 +94,32 @@ int make_object(struct objfile *obj)
 			glBegin(GL_QUADS);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
-			glVertex3f(obj->v[obj->f[i].face.f1].x,
-				obj->v[obj->f[i].face.f1].y,
-				obj->v[obj->f[i].face.f1].z);
-			glVertex3f(obj->v[obj->f[i].face.f2].x,
-				obj->v[obj->f[i].face.f2].y,
-				obj->v[obj->f[i].face.f2].z);
-			glVertex3f(obj->v[obj->f[i].face.f3].x,
-				obj->v[obj->f[i].face.f3].y,
-				obj->v[obj->f[i].face.f3].z);
-			glVertex3f(obj->v[obj->f[i].face.f4].x,
-				obj->v[obj->f[i].face.f4].y,
-				obj->v[obj->f[i].face.f4].z);
+			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
+				obj->v[obj->f[i].face.f1-1].y,
+				obj->v[obj->f[i].face.f1-1].z);
+			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
+				obj->v[obj->f[i].face.f2-1].y,
+				obj->v[obj->f[i].face.f2-1].z);
+			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
+				obj->v[obj->f[i].face.f3-1].y,
+				obj->v[obj->f[i].face.f3-1].z);
+			glVertex3f(obj->v[obj->f[i].face.f4-1].x,
+				obj->v[obj->f[i].face.f4-1].y,
+				obj->v[obj->f[i].face.f4-1].z);
 			glEnd();
 		} else {
 			glBegin(GL_TRIANGLES);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
-			glVertex3f(obj->v[obj->f[i].face.f1].x,
-				obj->v[obj->f[i].face.f1].y,
-				obj->v[obj->f[i].face.f1].z);
-			glVertex3f(obj->v[obj->f[i].face.f2].x,
-				obj->v[obj->f[i].face.f2].y,
-				obj->v[obj->f[i].face.f2].z);
-			glVertex3f(obj->v[obj->f[i].face.f3].x,
-				obj->v[obj->f[i].face.f3].y,
-				obj->v[obj->f[i].face.f3].z);
+			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
+				obj->v[obj->f[i].face.f1-1].y,
+				obj->v[obj->f[i].face.f1-1].z);
+			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
+				obj->v[obj->f[i].face.f2-1].y,
+				obj->v[obj->f[i].face.f2-1].z);
+			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
+				obj->v[obj->f[i].face.f3-1].y,
+				obj->v[obj->f[i].face.f3-1].z);
 			glEnd();
 		}
 	}
