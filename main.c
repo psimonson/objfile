@@ -8,7 +8,7 @@
 #include "GL/glew.h"
 #include "GL/glut.h"
 
-static struct objfile *obj;
+static int mybox;
 
 void change_size(int w, int h)
 {
@@ -25,11 +25,12 @@ void change_size(int w, int h)
 	glViewport(0, 0, w, h);
 	gluPerspective(45, ratio, 1, 100);
 	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void render_scene(void)
 {
-	extern struct objfile *obj;
+	extern int mybox;
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -39,7 +40,7 @@ void render_scene(void)
 		0.0f, 1.0f, 0.0f);
 
 	/* draw object */
-	draw_object(obj);
+	draw_object(mybox);
 
 	glutSwapBuffers();
 }
@@ -59,15 +60,16 @@ int init_glut(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	extern struct objfile *obj;
+	struct objfile *obj;
 
 	if(init_glut(argc, argv))
 		return 1;
 
 	obj = load_object("test.obj");
 	if(!obj) return 1;
+	mybox = make_object(obj);
 	print_object(obj);
-	glutMainLoop();
 	destroy_object(obj);
+	glutMainLoop();
 	return 0;
 }
