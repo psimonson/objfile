@@ -1,5 +1,5 @@
 CFLAGS+=-std=c89 -Wall -Wextra -Werror -g $(shell pkg-config --cflags prs)
-LDFLAGS+=$(shell pkg-config --libs prs) -lGL -lGLU -lGLEW -lglut
+LDFLAGS+=$(shell pkg-config --libs prs) -lGL -lGLU -lglut
 
 SRCDIR=$(shell pwd)
 

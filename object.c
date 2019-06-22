@@ -84,7 +84,7 @@ struct objfile *load_object(const char *filename)
 int make_object(struct objfile *obj)
 {
 	int unique_number;
-	size_t i,j;
+	size_t i;
 
 	/* Generate an object list for drawing later. */
 	unique_number = glGenLists(1);
@@ -94,21 +94,32 @@ int make_object(struct objfile *obj)
 			glBegin(GL_QUADS);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
-			for(j=0; j<4; j++) {
-				glVertex3f(obj->v[obj->f[i+j].num-1].x,
-					obj->v[obj->f[i+j].num-1].y,
-					obj->v[obj->f[i+j].num-1].z);
-			}
+			glVertex3f(obj->v[obj->f[i].face.f1].x,
+				obj->v[obj->f[i].face.f1].y,
+				obj->v[obj->f[i].face.f1].z);
+			glVertex3f(obj->v[obj->f[i].face.f2].x,
+				obj->v[obj->f[i].face.f2].y,
+				obj->v[obj->f[i].face.f2].z);
+			glVertex3f(obj->v[obj->f[i].face.f3].x,
+				obj->v[obj->f[i].face.f3].y,
+				obj->v[obj->f[i].face.f3].z);
+			glVertex3f(obj->v[obj->f[i].face.f4].x,
+				obj->v[obj->f[i].face.f4].y,
+				obj->v[obj->f[i].face.f4].z);
 			glEnd();
 		} else {
 			glBegin(GL_TRIANGLES);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
-			for(j=0; j<3; j++) {
-				glVertex3f(obj->v[obj->f[i+j].num-1].x,
-					obj->v[obj->f[i+j].num-1].y,
-					obj->v[obj->f[i+j].num-1].z);
-			}
+			glVertex3f(obj->v[obj->f[i].face.f1].x,
+				obj->v[obj->f[i].face.f1].y,
+				obj->v[obj->f[i].face.f1].z);
+			glVertex3f(obj->v[obj->f[i].face.f2].x,
+				obj->v[obj->f[i].face.f2].y,
+				obj->v[obj->f[i].face.f2].z);
+			glVertex3f(obj->v[obj->f[i].face.f3].x,
+				obj->v[obj->f[i].face.f3].y,
+				obj->v[obj->f[i].face.f3].z);
 			glEnd();
 		}
 	}
@@ -120,7 +131,7 @@ int make_object(struct objfile *obj)
  */
 void draw_object(int id)
 {
-	UNUSED(id);
+	glCallList(id);
 }
 /**
  * @brief Print object data.

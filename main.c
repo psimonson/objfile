@@ -5,10 +5,14 @@
 #include "unused.h"
 #include "object.h"
 #include "vector.h"
-#include "GL/glew.h"
-#include "GL/glut.h"
+#include "GL/freeglut.h"
 
 static int mybox;
+
+void cleanup()
+{
+	glDeleteLists(mybox, 1);
+}
 
 void change_size(int w, int h)
 {
@@ -28,7 +32,7 @@ void change_size(int w, int h)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void render_scene(void)
+void render_scene()
 {
 	extern int mybox;
 
@@ -55,6 +59,7 @@ int init_glut(int argc, char **argv)
 	glutDisplayFunc(render_scene);
 	glutIdleFunc(render_scene);
 	glutReshapeFunc(change_size);
+	glutCloseFunc(cleanup);
 	return 0;
 }
 
