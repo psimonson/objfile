@@ -4,7 +4,7 @@ LDFLAGS+=$(shell pkg-config --libs prs) -lGL -lGLU -lglut
 SRCDIR=$(shell pwd)
 
 VERSION=0.1
-BASENAM=$(shell echo $$(basename $(SRCDIR)))
+BASENAM=$(shell basename $(SRCDIR))
 TARNAME=$(BASENAM)-$(VERSION).tgz
 
 SOURCE=$(shell find . -maxdepth 1 -iname '*.c')
@@ -27,6 +27,6 @@ distclean: clean
 
 dist:
 	@echo Compressing $(TARNAME)...
-	@cd .. && tar -cf - --exclude=.git ./$(BASNAME) | \
-	gzip -9 > ../$(TARNAME) && echo Compression done! || \
+	@cd .. && tar --exclude=.git -cf - ./$(BASENAM) | \
+	gzip -9 > ./$(TARNAME) && echo Compression done! || \
 	echo Compression failed.
