@@ -9,6 +9,20 @@
 #include "file.h"
 #include "unused.h"
 
+/* --------------------------- Helper Functions -------------------------- */
+
+/**
+ * @brief Count number of chars in string that occured.
+ */
+int strichr(const char *s, int ch)
+{
+	int i;
+	for(i=0; *s; s++)
+		if(*s == ch)
+			i++;
+	return i;
+}
+
 /* --------------------------- Object Functions -------------------------- */
 
 /**
@@ -42,11 +56,24 @@ struct objfile *load_object(const char *filename)
 			vector_push_back(obj->vn, v);
 		} else if(!strcmp(buf, "f")) {
 			struct face f;
-			readf_file(&file, "%d//%d %d//%d %d//%d %d//%d",
-				&f.face.f1, &f.face.f2, &f.face.f3,
-				&f.face.f4, &f.face.f5, &f.face.f6,
-				&f.face.f7, &f.face.f8);
-			vector_push_back(obj->f, f);
+			if(gets_file(&file, buf, sizeof(buf)) == NULL)
+				continue;
+			if(strichr(buf, ' ') == 4) {
+				f.four = 1;
+				sscanf(buf, "%d//%d %d//%d %d//%d %d//%d",
+					&f.face.f1, &f.face.f2, &f.face.f3,
+					&f.face.f4, &f.face.f5, &f.face.f6,
+					&f.face.f7, &f.face.f8);
+				vector_push_back(obj->f, f);
+			} else {
+				f.four = 0;
+				sscanf(buf, "%d//%d %d//%d %d//%d",
+					&f.face.f1, &f.face.f2, &f.face.f3,
+					&f.face.f4, &f.face.f5, &f.face.f6);
+				f.face.f7 = 0;
+				f.face.f8 = 0;
+				vector_push_back(obj->f, f);
+			}
 		}
 	}
 	close_file(&file);
@@ -79,12 +106,14 @@ void print_object(struct objfile *obj)
 	}
 	printf("=====================================================\n");
 	for(i=0; i < vector_size(obj->f); i++) {
-		printf("%d//%d %d//%d %d//%d %d//%d\n",
+		printf("Quad: %d\n%d//%d %d//%d %d//%d %d//%d\n",
+			obj->f[i].four,
 			obj->f[i].face.f1, obj->f[i].face.f2,
 			obj->f[i].face.f3, obj->f[i].face.f4,
 			obj->f[i].face.f5, obj->f[i].face.f6,
 			obj->f[i].face.f7, obj->f[i].face.f8);
 	}
+	printf("=====================================================\n");
 }
 /**
  * @brief Destroy given object structure.

@@ -24,7 +24,6 @@ struct vec3 {
 };
 
 struct face {
-	int facenum;
 	char four;
 	char unused[3];
 	struct {
