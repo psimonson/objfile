@@ -27,6 +27,6 @@ distclean: clean
 
 dist:
 	@echo Compressing $(TARNAME)...
-	@cd .. && tar --exclude=.git -cf - ./$(BASNAME) | \
+	@cd .. && tar --exclude=. --exclude=.git -cf - ./$(BASNAME) | \
 	gzip -9 > $(TARNAME) && echo Compression done! || \
-	echo Compression failed. || exit 1
+	echo Compression failed.
