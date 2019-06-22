@@ -44,6 +44,7 @@ void render_scene()
 		0.0f, 1.0f, 0.0f);
 
 	/* draw object */
+	glTranslatef(0.0f, 0.0f, -20.0f);
 	draw_object(mybox);
 
 	glutSwapBuffers();
