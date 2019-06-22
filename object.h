@@ -26,11 +26,10 @@ struct vec3 {
 struct face {
 	char four;
 	char unused[3];
+	int num;
 	struct {
 		int f1, f2;
 		int f3, f4;
-		int f5, f6;
-		int f7, f8;
 	} face;
 };
 

@@ -61,23 +61,53 @@ struct objfile *load_object(const char *filename)
 			if(strichr(buf, ' ') == 4) {
 				f.four = 1;
 				sscanf(buf, "%d//%d %d//%d %d//%d %d//%d",
-					&f.face.f1, &f.face.f2, &f.face.f3,
-					&f.face.f4, &f.face.f5, &f.face.f6,
-					&f.face.f7, &f.face.f8);
+					&f.face.f1, &f.num, &f.face.f2,
+					&f.num, &f.face.f3, &f.num,
+					&f.face.f4, &f.num);
 				vector_push_back(obj->f, f);
 			} else {
 				f.four = 0;
 				sscanf(buf, "%d//%d %d//%d %d//%d",
-					&f.face.f1, &f.face.f2, &f.face.f3,
-					&f.face.f4, &f.face.f5, &f.face.f6);
-				f.face.f7 = 0;
-				f.face.f8 = 0;
+					&f.face.f1, &f.num, &f.face.f2,
+					&f.num, &f.face.f3, &f.num);
+				f.face.f4 = 0;
 				vector_push_back(obj->f, f);
 			}
 		}
 	}
 	close_file(&file);
 	return obj;
+}
+/**
+ * @brief Generate a gl list for drawing.
+ */
+int make_object(struct objfile *obj)
+{
+	int unique_number;
+	size_t i;
+
+	/* Generate an object list for drawing later. */
+	unique_number = glGenLists(1);
+	glNewList(unique_number, GL_COMPILE);
+	for(i=0; i < vector_size(obj->f); i++) {
+		if(obj->f[i].four) {
+			glBegin(GL_QUADS);
+			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
+				obj->vn[obj->f[i].num-1].z);
+			glVertex3f(obj->v[obj->f[i].num-1].x, obj->v[obj->f[i].num-1].y,
+				obj->v[obj->f[i].num-1].z);
+			glEnd();
+		} else {
+			glBegin(GL_TRIANGLES);
+			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
+				obj->vn[obj->f[i].num-1].z);
+			glVertex3f(obj->v[obj->f[i].num-1].x, obj->v[obj->f[i].num-1].y,
+				obj->v[obj->f[i].num-1].z);
+			glEnd();
+		}
+	}
+	glEndList();
+	return unique_number;
 }
 /**
  * @brief Draw object to screen.
@@ -106,12 +136,18 @@ void print_object(struct objfile *obj)
 	}
 	printf("=====================================================\n");
 	for(i=0; i < vector_size(obj->f); i++) {
-		printf("Quad: %d\n%d//%d %d//%d %d//%d %d//%d\n",
-			obj->f[i].four,
-			obj->f[i].face.f1, obj->f[i].face.f2,
-			obj->f[i].face.f3, obj->f[i].face.f4,
-			obj->f[i].face.f5, obj->f[i].face.f6,
-			obj->f[i].face.f7, obj->f[i].face.f8);
+		if(obj->f[i].four) {
+			printf("Quad: %d\n%d//%d %d//%d %d//%d %d//%d\n",
+				obj->f[i].four, obj->f[i].face.f1, obj->f[i].num,
+				obj->f[i].face.f2, obj->f[i].num,
+				obj->f[i].face.f3, obj->f[i].num,
+				obj->f[i].face.f4, obj->f[i].num);
+		} else {
+			printf("Quad: %d\n%d//%d %d//%d %d//%d\n",
+				obj->f[i].four, obj->f[i].face.f1, obj->f[i].num,
+				obj->f[i].face.f2, obj->f[i].num,
+				obj->f[i].face.f3, obj->f[i].num);
+		}
 	}
 	printf("=====================================================\n");
 }
