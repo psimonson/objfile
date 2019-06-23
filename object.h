@@ -37,6 +37,7 @@ struct objfile {
 	struct vec3 *vn;
 	struct face *f;
 	int *t;
+	int *l;
 	char istex;
 	char isnorm;
 	char ismat;
@@ -45,7 +46,7 @@ struct objfile {
 PRS_EXPORT struct objfile *init_object(void);
 PRS_EXPORT int load_object(struct objfile *obj, const char*);
 PRS_EXPORT void destroy_object(struct objfile*);
-PRS_EXPORT int make_object(struct objfile*);
+/*PRS_EXPORT int make_object(struct objfile*);*/
 PRS_EXPORT void draw_object(int id);
 PRS_EXPORT void print_object(struct objfile*);
 

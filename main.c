@@ -7,7 +7,6 @@
 #include "GL/freeglut.h"
 
 static struct objfile *obj;
-static int obj_id;
 
 void cleanup()
 {
@@ -35,7 +34,6 @@ void change_size(int w, int h)
 
 void render_scene()
 {
-	extern int obj_id;
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
@@ -45,7 +43,7 @@ void render_scene()
 
 	/* draw object */
 	glTranslatef(0.0f, 0.0f, -20.0f);
-	draw_object(obj_id);
+	draw_object(obj->l[0]);
 
 	glutSwapBuffers();
 }
@@ -67,7 +65,6 @@ int init_glut(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	extern struct objfile *obj;
-	extern int obj_id;
 
 	if(init_glut(argc, argv))
 		return 1;
@@ -78,7 +75,6 @@ int main(int argc, char **argv)
 		fprintf(stderr, "Error: Cannot load object...\n");
 		return 1;
 	}
-	obj_id = make_object(obj);
 	print_object(obj);
 	glutMainLoop();
 	return 0;

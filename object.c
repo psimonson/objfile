@@ -38,56 +38,9 @@ struct objfile *init_object(void)
 	}
 	obj->ismat = obj->istex = obj->isnorm = 0;
 	obj->v = obj->vn = NULL;
+	obj->t = obj->l = NULL;
 	obj->f = NULL;
-	obj->t = NULL;
 	return obj;
-}
-/**
- * @brief Create object from file.
- */
-int load_object(struct objfile *obj, const char *filename)
-{
-	file_t file;
-	char buf[256];
-
-	init_file(&file);
-	open_file(&file, filename, "rt");
-	if(get_errori_file(&file) != FILE_ERROR_OKAY) {
-		fprintf(stderr, "Error: %s\n", get_error_file(&file));
-		return 1;
-	}
-	while(readf_file(&file, "%s", buf) != EOF) {
-		if(!strcmp(buf, "v")) {
-			struct vec3 v;
-			readf_file(&file, "%f %f %f", &v.x, &v.y, &v.z);
-			vector_push_back(obj->v, v);
-		} else if(!strcmp(buf, "vn")) {
-			struct vec3 v;
-			readf_file(&file, "%f %f %f", &v.x, &v.y, &v.z);
-			vector_push_back(obj->vn, v);
-		} else if(!strcmp(buf, "f")) {
-			struct face f;
-			if(gets_file(&file, buf, sizeof(buf)) == NULL)
-				continue;
-			if(strichr(buf, ' ') == 4) {
-				f.four = 1;
-				sscanf(buf, "%d//%d %d//%d %d//%d %d//%d",
-					&f.face.f1, &f.num, &f.face.f2,
-					&f.num, &f.face.f3, &f.num,
-					&f.face.f4, &f.num);
-				vector_push_back(obj->f, f);
-			} else {
-				f.four = 0;
-				sscanf(buf, "%d//%d %d//%d %d//%d",
-					&f.face.f1, &f.num, &f.face.f2,
-					&f.num, &f.face.f3, &f.num);
-				f.face.f4 = 0;
-				vector_push_back(obj->f, f);
-			}
-		}
-	}
-	close_file(&file);
-	return 0;
 }
 /**
  * @brief Generate a gl list for drawing.
@@ -136,6 +89,54 @@ int make_object(struct objfile *obj)
 	}
 	glEndList();
 	return unique_number;
+}
+/**
+ * @brief Create object from file.
+ */
+int load_object(struct objfile *obj, const char *filename)
+{
+	file_t file;
+	char buf[256];
+
+	init_file(&file);
+	open_file(&file, filename, "rt");
+	if(get_errori_file(&file) != FILE_ERROR_OKAY) {
+		fprintf(stderr, "Error: %s\n", get_error_file(&file));
+		return 1;
+	}
+	while(readf_file(&file, "%s", buf) != EOF) {
+		if(!strcmp(buf, "v")) {
+			struct vec3 v;
+			readf_file(&file, "%f %f %f", &v.x, &v.y, &v.z);
+			vector_push_back(obj->v, v);
+		} else if(!strcmp(buf, "vn")) {
+			struct vec3 v;
+			readf_file(&file, "%f %f %f", &v.x, &v.y, &v.z);
+			vector_push_back(obj->vn, v);
+		} else if(!strcmp(buf, "f")) {
+			struct face f;
+			if(gets_file(&file, buf, sizeof(buf)) == NULL)
+				continue;
+			if(strichr(buf, ' ') == 4) {
+				f.four = 1;
+				sscanf(buf, "%d//%d %d//%d %d//%d %d//%d",
+					&f.face.f1, &f.num, &f.face.f2,
+					&f.num, &f.face.f3, &f.num,
+					&f.face.f4, &f.num);
+				vector_push_back(obj->f, f);
+			} else {
+				f.four = 0;
+				sscanf(buf, "%d//%d %d//%d %d//%d",
+					&f.face.f1, &f.num, &f.face.f2,
+					&f.num, &f.face.f3, &f.num);
+				f.face.f4 = 0;
+				vector_push_back(obj->f, f);
+			}
+		}
+	}
+	close_file(&file);
+	vector_push_back(obj->l, make_object(obj));
+	return 0;
 }
 /**
  * @brief Draw object to screen.
@@ -188,6 +189,7 @@ void destroy_object(struct objfile *obj)
 	vector_free(obj->vn);
 	vector_free(obj->f);
 	vector_free(obj->t);
+	vector_free(obj->l);
 	memset(obj, 0, sizeof(struct objfile));
 	free(obj);
 }
