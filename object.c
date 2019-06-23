@@ -26,11 +26,27 @@ int strichr(const char *s, int ch)
 /* --------------------------- Object Functions -------------------------- */
 
 /**
- * @brief Create object from file.
+ * @brief Create object and set to default values.
  */
-struct objfile *load_object(const char *filename)
+struct objfile *init_object(void)
 {
 	struct objfile *obj;
+	obj = (struct objfile*)malloc(sizeof(struct objfile));
+	if(!obj) {
+		fprintf(stderr, "Error: Cannot create object, out of memory.\n");
+		return NULL;
+	}
+	obj->ismat = obj->istex = obj->isnorm = 0;
+	obj->v = obj->vn = NULL;
+	obj->f = NULL;
+	obj->t = NULL;
+	return obj;
+}
+/**
+ * @brief Create object from file.
+ */
+int load_object(struct objfile *obj, const char *filename)
+{
 	file_t file;
 	char buf[256];
 
@@ -38,13 +54,8 @@ struct objfile *load_object(const char *filename)
 	open_file(&file, filename, "rt");
 	if(get_errori_file(&file) != FILE_ERROR_OKAY) {
 		fprintf(stderr, "Error: %s\n", get_error_file(&file));
-		return NULL;
+		return 1;
 	}
-	obj = (struct objfile*)malloc(sizeof(struct objfile));
-	if(!obj) return NULL;
-	obj->v = NULL;
-	obj->vn = NULL;
-	obj->f = NULL;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "v")) {
 			struct vec3 v;
@@ -76,7 +87,7 @@ struct objfile *load_object(const char *filename)
 		}
 	}
 	close_file(&file);
-	return obj;
+	return 0;
 }
 /**
  * @brief Generate a gl list for drawing.
@@ -176,6 +187,7 @@ void destroy_object(struct objfile *obj)
 	vector_free(obj->v);
 	vector_free(obj->vn);
 	vector_free(obj->f);
+	vector_free(obj->t);
 	memset(obj, 0, sizeof(struct objfile));
 	free(obj);
 }

@@ -4,14 +4,15 @@
 
 #include "unused.h"
 #include "object.h"
-#include "vector.h"
 #include "GL/freeglut.h"
 
-static int mybox;
+static struct objfile *obj;
+static int obj_id;
 
 void cleanup()
 {
-	glDeleteLists(mybox, 1);
+	extern struct objfile *obj;
+	destroy_object(obj);
 }
 
 void change_size(int w, int h)
@@ -34,8 +35,7 @@ void change_size(int w, int h)
 
 void render_scene()
 {
-	extern int mybox;
-
+	extern int obj_id;
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
@@ -45,7 +45,7 @@ void render_scene()
 
 	/* draw object */
 	glTranslatef(0.0f, 0.0f, -20.0f);
-	draw_object(mybox);
+	draw_object(obj_id);
 
 	glutSwapBuffers();
 }
@@ -66,16 +66,20 @@ int init_glut(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	struct objfile *obj;
+	extern struct objfile *obj;
+	extern int obj_id;
 
 	if(init_glut(argc, argv))
 		return 1;
 
-	obj = load_object("test.obj");
+	obj = init_object();
 	if(!obj) return 1;
-	mybox = make_object(obj);
+	if(load_object(obj, "test.obj")) {
+		fprintf(stderr, "Error: Cannot load object...\n");
+		return 1;
+	}
+	obj_id = make_object(obj);
 	print_object(obj);
-	destroy_object(obj);
 	glutMainLoop();
 	return 0;
 }
