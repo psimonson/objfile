@@ -31,8 +31,8 @@ struct face {
 		int f3, f4;
 	} face;
 	struct {
-		float t1, t2;
-		float t3, t4;
+		int t1, t2;
+		int t3, t4;
 	} tex;
 };
 

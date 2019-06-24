@@ -164,13 +164,21 @@ int load_object(struct objfile *obj, const char *filename)
 					&f.face.f4, &f.num);
 					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
 					vector_push_back(obj->f, f);
-				} else {
+				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
-					"%d/%f/%d %d/%f/%d %d/%f/%d %d/%f/%d",
+					"%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
 					&f.face.f1, &f.tex.t1, &f.num,
 					&f.face.f2, &f.tex.t2, &f.num,
 					&f.face.f3, &f.tex.t3, &f.num,
 					&f.face.f4, &f.tex.t4, &f.num);
+					vector_push_back(obj->f, f);
+				} else {
+					sscanf(buf,
+					"%d %d %d %d",
+					&f.face.f1, &f.face.f2, &f.face.f3,
+					&f.face.f4);
+					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
+					f.num=0;
 					vector_push_back(obj->f, f);
 				}
 			} else {
@@ -182,14 +190,21 @@ int load_object(struct objfile *obj, const char *filename)
 					f.face.f4 = 0;
 					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
 					vector_push_back(obj->f, f);
-				} else {
+				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
-					"%d/%f/%d %d/%f/%d %d/%f/%d",
+					"%d/%d/%d %d/%d/%d %d/%d/%d",
 					&f.face.f1, &f.tex.t1, &f.num,
 					&f.face.f2, &f.tex.t2, &f.num,
 					&f.face.f3, &f.tex.t3, &f.num);
 					f.face.f4 = 0;
 					f.tex.t4 = 0;
+					vector_push_back(obj->f, f);
+				} else {
+					sscanf(buf,
+					"%d %d %d",
+					&f.face.f1, &f.face.f2, &f.face.f3);
+					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
+					f.face.f4 = f.num = 0;
 					vector_push_back(obj->f, f);
 				}
 			}
