@@ -1,8 +1,10 @@
 =============================================
              .:[OBJFILE v0.1]:.
 =============================================
- * Basic setup of universal dynamic array.
- - Grow array when full.
+ * Create a simple OBJ loader for OpenGL.
+ * Add texture coordinates for object loader.
+ - Load materials for objects.
+ - Finish loading textures for objects.
 =============================================
 NOTE: An '*' character means that it's done
 and '-' character means, "needs to be done".
