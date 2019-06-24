@@ -3,6 +3,7 @@
 =============================================
  * Create a simple OBJ loader for OpenGL.
  * Add texture coordinates for object loader.
+ * Updated print_object(), to print all data.
  - Load materials for objects.
  - Finish loading textures for objects.
 =============================================
