@@ -4,6 +4,7 @@
 
 #include <GL/gl.h>
 
+#include "bitmap.h"
 #include "object.h"
 #include "vector.h"
 #include "file.h"
@@ -45,9 +46,9 @@ struct objfile *init_object(void)
 /**
  * @brief Generate a gl list for drawing.
  */
-int make_object(struct objfile *obj)
+static unsigned int make_object(struct objfile *obj)
 {
-	int unique_number;
+	unsigned int unique_number;
 	size_t i;
 
 	/* Generate an object list for drawing later. */
@@ -91,6 +92,31 @@ int make_object(struct objfile *obj)
 	return unique_number;
 }
 /**
+ * @brief Load a texture from a filename.
+ */
+static unsigned int load_texture(const char *filename)
+{
+	unsigned int tex_id;
+	Bitmap *bmp;
+
+	bmp = load_bitmap(filename);
+	if(!bmp) return (0xff << 24) + 1;
+	glGenTextures(1, &tex_id);
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+	/* Map the image to the texture */
+	glTexImage2D(GL_TEXTURE_2D,
+			0,	/* 0 for now */
+			GL_RGB, /* Format OpenGL uses for textures */
+			bmp->info.width,
+			bmp->info.height,
+			0,
+			GL_BGR,
+			GL_UNSIGNED_BYTE,
+			bmp->data);
+	destroy_bitmap(bmp);
+	return tex_id;
+}
+/**
  * @brief Create object from file.
  */
 int load_object(struct objfile *obj, const char *filename)
@@ -98,6 +124,7 @@ int load_object(struct objfile *obj, const char *filename)
 	file_t file;
 	char buf[256];
 
+	UNUSED(load_texture(NULL));
 	init_file(&file);
 	open_file(&file, filename, "rt");
 	if(get_errori_file(&file) != FILE_ERROR_OKAY) {
