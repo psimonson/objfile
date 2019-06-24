@@ -242,16 +242,58 @@ void print_object(struct objfile *obj)
 	printf("=====================================================\n");
 	for(i=0; i < vector_size(obj->f); i++) {
 		if(obj->f[i].four) {
-			printf("Quad: %d\n%d//%d %d//%d %d//%d %d//%d\n",
-				obj->f[i].four, obj->f[i].face.f1, obj->f[i].num,
+			if(obj->f[i].tex.t1 == 0 && obj->f[i].num) {
+				printf("Quad: %d\n"
+				"%d//%d %d//%d %d//%d %d//%d\n",
+				obj->f[i].four,
+				obj->f[i].face.f1, obj->f[i].num,
 				obj->f[i].face.f2, obj->f[i].num,
 				obj->f[i].face.f3, obj->f[i].num,
 				obj->f[i].face.f4, obj->f[i].num);
+			} else if(obj->f[i].tex.t1 && obj->f[i].num) {
+				printf("Quad: %d\n"
+				"%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d\n",
+				obj->f[i].four,
+				obj->f[i].face.f1, obj->f[i].tex.t1,
+				obj->f[i].num,
+				obj->f[i].face.f2, obj->f[i].tex.t2,
+				obj->f[i].num,
+				obj->f[i].face.f3, obj->f[i].tex.t3,
+				obj->f[i].num,
+				obj->f[i].face.f4, obj->f[i].tex.t4,
+				obj->f[i].num);
+			} else {
+				printf("Quad: %d\n"
+				"%d %d %d %d\n",
+				obj->f[i].four,
+				obj->f[i].face.f1, obj->f[i].face.f2,
+				obj->f[i].face.f3, obj->f[i].face.f4);
+			}
 		} else {
-			printf("Quad: %d\n%d//%d %d//%d %d//%d\n",
-				obj->f[i].four, obj->f[i].face.f1, obj->f[i].num,
+			if(obj->f[i].tex.t1 == 0 && obj->f[i].num) {
+				printf("Quad: %d\n"
+				"%d//%d %d//%d %d//%d\n",
+				obj->f[i].four,
+				obj->f[i].face.f1, obj->f[i].num,
 				obj->f[i].face.f2, obj->f[i].num,
 				obj->f[i].face.f3, obj->f[i].num);
+			} else if(obj->f[i].tex.t1 && obj->f[i].num) {
+				printf("Quad: %d\n"
+				"%d/%d/%d %d/%d/%d %d/%d/%d\n",
+				obj->f[i].four,
+				obj->f[i].face.f1, obj->f[i].tex.t1,
+				obj->f[i].num,
+				obj->f[i].face.f2, obj->f[i].tex.t2,
+				obj->f[i].num,
+				obj->f[i].face.f3, obj->f[i].tex.t3,
+				obj->f[i].num);
+			} else {
+				printf("Quad: %d\n"
+				"%d %d %d\n",
+				obj->f[i].four,
+				obj->f[i].face.f1, obj->f[i].face.f2,
+				obj->f[i].face.f3);
+			}
 		}
 	}
 	printf("=====================================================\n");
