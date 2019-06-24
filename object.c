@@ -1,3 +1,13 @@
+/**
+ * @file object.c
+ * @author Philip R. Simonson
+ * @date 19 June 2019
+ * @brief Blender wavefront OBJ loader.
+ *
+ * @details This is a simple object file format loader for
+ * Wavefront OBJ files.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,7 +54,7 @@ struct objfile *init_object(void)
 	return obj;
 }
 /**
- * @brief Generate a gl list for drawing.
+ * @brief Generate a GL list for drawing.
  */
 static unsigned int make_object(struct objfile *obj)
 {
@@ -146,18 +156,42 @@ int load_object(struct objfile *obj, const char *filename)
 				continue;
 			if(strichr(buf, ' ') == 4) {
 				f.four = 1;
-				sscanf(buf, "%d//%d %d//%d %d//%d %d//%d",
+				if(strstr(buf, "//") != NULL) {
+					sscanf(buf,
+					"%d//%d %d//%d %d//%d %d//%d",
 					&f.face.f1, &f.num, &f.face.f2,
 					&f.num, &f.face.f3, &f.num,
 					&f.face.f4, &f.num);
-				vector_push_back(obj->f, f);
+					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
+					vector_push_back(obj->f, f);
+				} else {
+					sscanf(buf,
+					"%d/%f/%d %d/%f/%d %d/%f/%d %d/%f/%d",
+					&f.face.f1, &f.tex.t1, &f.num,
+					&f.face.f2, &f.tex.t2, &f.num,
+					&f.face.f3, &f.tex.t3, &f.num,
+					&f.face.f4, &f.tex.t4, &f.num);
+					vector_push_back(obj->f, f);
+				}
 			} else {
 				f.four = 0;
-				sscanf(buf, "%d//%d %d//%d %d//%d",
+				if(strstr(buf, "//") != NULL) {
+					sscanf(buf, "%d//%d %d//%d %d//%d",
 					&f.face.f1, &f.num, &f.face.f2,
 					&f.num, &f.face.f3, &f.num);
-				f.face.f4 = 0;
-				vector_push_back(obj->f, f);
+					f.face.f4 = 0;
+					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
+					vector_push_back(obj->f, f);
+				} else {
+					sscanf(buf,
+					"%d/%f/%d %d/%f/%d %d/%f/%d",
+					&f.face.f1, &f.tex.t1, &f.num,
+					&f.face.f2, &f.tex.t2, &f.num,
+					&f.face.f3, &f.tex.t3, &f.num);
+					f.face.f4 = 0;
+					f.tex.t4 = 0;
+					vector_push_back(obj->f, f);
+				}
 			}
 		}
 	}
@@ -220,3 +254,4 @@ void destroy_object(struct objfile *obj)
 	memset(obj, 0, sizeof(struct objfile));
 	free(obj);
 }
+

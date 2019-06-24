@@ -30,6 +30,10 @@ struct face {
 		int f1, f2;
 		int f3, f4;
 	} face;
+	struct {
+		float t1, t2;
+		float t3, t4;
+	} tex;
 };
 
 struct objfile {
