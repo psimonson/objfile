@@ -148,27 +148,34 @@ static int load_material(struct objfile *obj, const char *filename)
 			if(obj->ismat) {
 				mat.texture = curmat;
 				vector_push_back(obj->mat, mat);
-				obj->ismat = 0;
 				curmat++;
-			} else {
-				readf_file(&file, "%s", mat.name);
-				obj->ismat = 1;
 			}
+			obj->ismat = 0;
+			readf_file(&file, "%s", mat.name);
 		} else if(!strcmp(buf, "Ns")) {
 			readf_file(&file, "%f", &mat.ns);
+			obj->ismat = 1;
 		} else if(!strcmp(buf, "Ka")) {
 			readf_file(&file, "%f %f %f",
 				&mat.amb[0], &mat.amb[1], &mat.amb[2]);
+			obj->ismat = 1;
 		} else if(!strcmp(buf, "Kd")) {
 			readf_file(&file, "%f %f %f",
 				&mat.dif[0], &mat.dif[1], &mat.dif[2]);
+			obj->ismat = 1;
 		} else if(!strcmp(buf, "Ks")) {
 			readf_file(&file, "%f %f %f",
 				&mat.spec[0], &mat.spec[1], &mat.spec[2]);
+			obj->ismat = 1;
 		} else if(!strcmp(buf, "Ni")) {
 			readf_file(&file, "%f", &mat.ni);
+			obj->ismat = 1;
+		} else if(!strcmp(buf, "d")) {
+			readf_file(&file, "%f", &mat.alpha);
+			obj->ismat = 1;
 		} else if(!strcmp(buf, "illum")) {
 			readf_file(&file, "%f", &mat.illum);
+			obj->ismat = 1;
 		}
 	}
 	obj->ismat = 1;
