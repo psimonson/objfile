@@ -145,7 +145,7 @@ static unsigned int load_texture(const char *filename)
 			bmp->info.width,
 			bmp->info.height,
 			0,
-			GL_BGR,
+			GL_RGB,
 			GL_UNSIGNED_BYTE,
 			bmp->data);
 	destroy_bitmap(bmp);
