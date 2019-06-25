@@ -134,21 +134,18 @@ static int load_material(struct objfile *obj, const char *filename)
 {
 	file_t file;
 	char buf[256];
-	int curmat;
 
 	init_file(&file);
 	open_file(&file, filename, "rt");
 	if(get_errori_file(&file) != FILE_ERROR_OKAY)
 		return 1;
-	curmat = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		struct material mat;
 		memset(&mat, 0, sizeof(struct material));
+		mat.texture = -1;
 		if(!strcmp(buf, "newmtl")) {
 			if(obj->ismat) {
-				mat.texture = curmat;
 				vector_push_back(obj->mat, mat);
-				curmat++;
 			}
 			obj->ismat = 0;
 			readf_file(&file, "%s", mat.name);
@@ -175,6 +172,11 @@ static int load_material(struct objfile *obj, const char *filename)
 			obj->ismat = 1;
 		} else if(!strcmp(buf, "illum")) {
 			readf_file(&file, "%f", &mat.illum);
+			obj->ismat = 1;
+		} else if(!strcmp(buf, "map_Kd")) {
+			char tmp[256];
+			readf_file(&file, "%s", tmp);
+			mat.texture = load_texture(tmp);
 			obj->ismat = 1;
 		}
 	}
