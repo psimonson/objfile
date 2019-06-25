@@ -29,11 +29,7 @@ struct face {
 	struct {
 		int f1, f2;
 		int f3, f4;
-	} face;
-	struct {
-		int t1, t2;
-		int t3, t4;
-	} tex;
+	} face,tex;
 };
 
 struct objfile {

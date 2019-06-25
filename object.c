@@ -162,22 +162,22 @@ int load_object(struct objfile *obj, const char *filename)
 					&f.face.f1, &f.num, &f.face.f2,
 					&f.num, &f.face.f3, &f.num,
 					&f.face.f4, &f.num);
-					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
+					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
 					vector_push_back(obj->f, f);
 				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
 					"%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
-					&f.face.f1, &f.tex.t1, &f.num,
-					&f.face.f2, &f.tex.t2, &f.num,
-					&f.face.f3, &f.tex.t3, &f.num,
-					&f.face.f4, &f.tex.t4, &f.num);
+					&f.face.f1, &f.tex.f1, &f.num,
+					&f.face.f2, &f.tex.f2, &f.num,
+					&f.face.f3, &f.tex.f3, &f.num,
+					&f.face.f4, &f.tex.f4, &f.num);
 					vector_push_back(obj->f, f);
 				} else {
 					sscanf(buf,
 					"%d %d %d %d",
 					&f.face.f1, &f.face.f2, &f.face.f3,
 					&f.face.f4);
-					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
+					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
 					f.num=0;
 					vector_push_back(obj->f, f);
 				}
@@ -188,22 +188,22 @@ int load_object(struct objfile *obj, const char *filename)
 					&f.face.f1, &f.num, &f.face.f2,
 					&f.num, &f.face.f3, &f.num);
 					f.face.f4 = 0;
-					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
+					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
 					vector_push_back(obj->f, f);
 				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
 					"%d/%d/%d %d/%d/%d %d/%d/%d",
-					&f.face.f1, &f.tex.t1, &f.num,
-					&f.face.f2, &f.tex.t2, &f.num,
-					&f.face.f3, &f.tex.t3, &f.num);
+					&f.face.f1, &f.tex.f1, &f.num,
+					&f.face.f2, &f.tex.f2, &f.num,
+					&f.face.f3, &f.tex.f3, &f.num);
 					f.face.f4 = 0;
-					f.tex.t4 = 0;
+					f.tex.f4 = 0;
 					vector_push_back(obj->f, f);
 				} else {
 					sscanf(buf,
 					"%d %d %d",
 					&f.face.f1, &f.face.f2, &f.face.f3);
-					f.tex.t1=f.tex.t2=f.tex.t3=f.tex.t4=0;
+					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
 					f.face.f4 = f.num = 0;
 					vector_push_back(obj->f, f);
 				}
@@ -242,7 +242,7 @@ void print_object(struct objfile *obj)
 	printf("=====================================================\n");
 	for(i=0; i < vector_size(obj->f); i++) {
 		if(obj->f[i].four) {
-			if(obj->f[i].tex.t1 == 0 && obj->f[i].num) {
+			if(obj->f[i].tex.f1 == 0 && obj->f[i].num) {
 				printf("Quad: %d\n"
 				"%d//%d %d//%d %d//%d %d//%d\n",
 				obj->f[i].four,
@@ -250,17 +250,17 @@ void print_object(struct objfile *obj)
 				obj->f[i].face.f2, obj->f[i].num,
 				obj->f[i].face.f3, obj->f[i].num,
 				obj->f[i].face.f4, obj->f[i].num);
-			} else if(obj->f[i].tex.t1 && obj->f[i].num) {
+			} else if(obj->f[i].tex.f1 && obj->f[i].num) {
 				printf("Quad: %d\n"
 				"%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d\n",
 				obj->f[i].four,
-				obj->f[i].face.f1, obj->f[i].tex.t1,
+				obj->f[i].face.f1, obj->f[i].tex.f1,
 				obj->f[i].num,
-				obj->f[i].face.f2, obj->f[i].tex.t2,
+				obj->f[i].face.f2, obj->f[i].tex.f2,
 				obj->f[i].num,
-				obj->f[i].face.f3, obj->f[i].tex.t3,
+				obj->f[i].face.f3, obj->f[i].tex.f3,
 				obj->f[i].num,
-				obj->f[i].face.f4, obj->f[i].tex.t4,
+				obj->f[i].face.f4, obj->f[i].tex.f4,
 				obj->f[i].num);
 			} else {
 				printf("Quad: %d\n"
@@ -270,22 +270,22 @@ void print_object(struct objfile *obj)
 				obj->f[i].face.f3, obj->f[i].face.f4);
 			}
 		} else {
-			if(obj->f[i].tex.t1 == 0 && obj->f[i].num) {
+			if(obj->f[i].tex.f1 == 0 && obj->f[i].num) {
 				printf("Quad: %d\n"
 				"%d//%d %d//%d %d//%d\n",
 				obj->f[i].four,
 				obj->f[i].face.f1, obj->f[i].num,
 				obj->f[i].face.f2, obj->f[i].num,
 				obj->f[i].face.f3, obj->f[i].num);
-			} else if(obj->f[i].tex.t1 && obj->f[i].num) {
+			} else if(obj->f[i].tex.f1 && obj->f[i].num) {
 				printf("Quad: %d\n"
 				"%d/%d/%d %d/%d/%d %d/%d/%d\n",
 				obj->f[i].four,
-				obj->f[i].face.f1, obj->f[i].tex.t1,
+				obj->f[i].face.f1, obj->f[i].tex.f1,
 				obj->f[i].num,
-				obj->f[i].face.f2, obj->f[i].tex.t2,
+				obj->f[i].face.f2, obj->f[i].tex.f2,
 				obj->f[i].num,
-				obj->f[i].face.f3, obj->f[i].tex.t3,
+				obj->f[i].face.f3, obj->f[i].tex.f3,
 				obj->f[i].num);
 			} else {
 				printf("Quad: %d\n"
