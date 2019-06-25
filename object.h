@@ -30,7 +30,7 @@ struct face {
 	struct {
 		int f1, f2;
 		int f3, f4;
-	} face,tex;
+	} face, tex;
 };
 
 struct material {
@@ -38,6 +38,9 @@ struct material {
 	float alpha, ns, ni;
 	float dif[3], amb[3], spec[3];
 	int illum, texture;
+	struct {
+		float u, v;
+	} tex;
 };
 
 struct objfile {

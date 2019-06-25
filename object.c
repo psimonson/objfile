@@ -144,9 +144,8 @@ static int load_material(struct objfile *obj, const char *filename)
 		memset(&mat, 0, sizeof(struct material));
 		mat.texture = -1;
 		if(!strcmp(buf, "newmtl")) {
-			if(obj->ismat) {
+			if(obj->ismat)
 				vector_push_back(obj->mat, mat);
-			}
 			obj->ismat = 0;
 			readf_file(&file, "%s", mat.name);
 		} else if(!strcmp(buf, "Ns")) {
@@ -178,6 +177,9 @@ static int load_material(struct objfile *obj, const char *filename)
 			readf_file(&file, "%s", tmp);
 			mat.texture = load_texture(tmp);
 			obj->ismat = 1;
+		} else if(!strcmp(buf, "vt")) {
+			readf_file(&file, "%f %f", &mat.tex.u, &mat.tex.v);
+			obj->istex = 1;
 		}
 	}
 	obj->ismat = 1;
@@ -213,6 +215,7 @@ int load_object(struct objfile *obj, const char *filename)
 			struct face f;
 			if(gets_file(&file, buf, sizeof(buf)) == NULL)
 				continue;
+			memset(&f, 0, sizeof(struct face));
 			if(strichr(buf, ' ') == 4) {
 				f.four = 1;
 				if(strstr(buf, "//") != NULL) {
