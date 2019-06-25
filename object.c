@@ -61,11 +61,35 @@ static unsigned int make_object(struct objfile *obj)
 {
 	unsigned int unique_number;
 	size_t i;
+	int last;
 
 	/* Generate an object list for drawing later. */
+	last = -1;
 	unique_number = glGenLists(1);
 	glNewList(unique_number, GL_COMPILE);
 	for(i=0; i < vector_size(obj->f); i++) {
+		if(last != obj->f[i].mat && obj->ismat) {
+			float dif[] = {obj->mat[obj->f[i].mat].dif[0],
+				obj->mat[obj->f[i].mat].dif[1],
+				obj->mat[obj->f[i].mat].dif[2], 1.0f};
+			float amb[] = {obj->mat[obj->f[i].mat].amb[0],
+				obj->mat[obj->f[i].mat].amb[1],
+				obj->mat[obj->f[i].mat].amb[2], 1.0f};
+			float spec[] = {obj->mat[obj->f[i].mat].spec[0],
+				obj->mat[obj->f[i].mat].spec[1],
+				obj->mat[obj->f[i].mat].spec[2], 1.0f};
+			glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
+			glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
+			glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
+			last = obj->f[i].mat;
+			if(obj->mat[obj->f[i].mat].texture==-1)
+				glDisable(GL_TEXTURE_2D);
+			else {
+				glEnable(GL_TEXTURE_2D);
+				glBindTexture(GL_TEXTURE_2D,
+				obj->mat[obj->f[i].mat].texture);
+			}
+		}
 		if(obj->f[i].four) {
 			glBegin(GL_QUADS);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
@@ -134,55 +158,61 @@ static int load_material(struct objfile *obj, const char *filename)
 {
 	file_t file;
 	char buf[256];
+	int ismat;
 
 	init_file(&file);
 	open_file(&file, filename, "rt");
 	if(get_errori_file(&file) != FILE_ERROR_OKAY)
 		return 1;
+	ismat = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		struct material mat;
 		memset(&mat, 0, sizeof(struct material));
 		mat.texture = -1;
 		if(!strcmp(buf, "newmtl")) {
-			if(obj->ismat)
+			if(ismat)
 				vector_push_back(obj->mat, mat);
-			obj->ismat = 0;
+			ismat = 0;
 			readf_file(&file, "%s", mat.name);
 		} else if(!strcmp(buf, "Ns")) {
 			readf_file(&file, "%f", &mat.ns);
-			obj->ismat = 1;
+			ismat = 1;
 		} else if(!strcmp(buf, "Ka")) {
 			readf_file(&file, "%f %f %f",
 				&mat.amb[0], &mat.amb[1], &mat.amb[2]);
-			obj->ismat = 1;
+			ismat = 1;
 		} else if(!strcmp(buf, "Kd")) {
 			readf_file(&file, "%f %f %f",
 				&mat.dif[0], &mat.dif[1], &mat.dif[2]);
-			obj->ismat = 1;
+			ismat = 1;
 		} else if(!strcmp(buf, "Ks")) {
 			readf_file(&file, "%f %f %f",
 				&mat.spec[0], &mat.spec[1], &mat.spec[2]);
-			obj->ismat = 1;
+			ismat = 1;
 		} else if(!strcmp(buf, "Ni")) {
 			readf_file(&file, "%f", &mat.ni);
-			obj->ismat = 1;
+			ismat = 1;
 		} else if(!strcmp(buf, "d")) {
 			readf_file(&file, "%f", &mat.alpha);
-			obj->ismat = 1;
+			ismat = 1;
 		} else if(!strcmp(buf, "illum")) {
 			readf_file(&file, "%f", &mat.illum);
-			obj->ismat = 1;
+			ismat = 1;
 		} else if(!strcmp(buf, "map_Kd")) {
 			char tmp[256];
 			readf_file(&file, "%s", tmp);
 			mat.texture = load_texture(tmp);
-			obj->ismat = 1;
+			ismat = 1;
 		} else if(!strcmp(buf, "vt")) {
 			readf_file(&file, "%f %f", &mat.tex.u, &mat.tex.v);
+			mat.tex.v = 1-mat.tex.v;
 			obj->istex = 1;
 		}
 	}
-	obj->ismat = 1;
+	if(vector_size(obj->mat) == 0)
+		obj->ismat = 0;
+	else
+		obj->ismat = 1;
 	return 0;
 }
 /**

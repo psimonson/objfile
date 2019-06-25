@@ -37,7 +37,7 @@ struct material {
 	char name[256];
 	float alpha, ns, ni;
 	float dif[3], amb[3], spec[3];
-	int illum, texture;
+	int illum,texture;
 	struct {
 		float u, v;
 	} tex;
