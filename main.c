@@ -16,6 +16,7 @@ void cleanup()
 
 void change_size(int w, int h)
 {
+	const float col[] = {0.7,0.7,0.7,1.0};
 	float ratio;
 
 	if(h == 0)
@@ -30,6 +31,9 @@ void change_size(int w, int h)
 	gluPerspective(45, ratio, 1, 100);
 	glMatrixMode(GL_MODELVIEW);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
 }
 
 void render_scene()
@@ -58,7 +62,6 @@ int init_glut(int argc, char **argv)
 	glutDisplayFunc(render_scene);
 	glutIdleFunc(render_scene);
 	glutReshapeFunc(change_size);
-	glutCloseFunc(cleanup);
 	return 0;
 }
 
@@ -77,5 +80,6 @@ int main(int argc, char **argv)
 	}
 	print_object(obj);
 	glutMainLoop();
+	cleanup();
 	return 0;
 }
