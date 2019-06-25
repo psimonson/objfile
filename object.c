@@ -50,6 +50,7 @@ struct objfile *init_object(void)
 	obj->ismat = obj->istex = obj->isnorm = 0;
 	obj->v = obj->vn = NULL;
 	obj->t = obj->l = NULL;
+	obj->mat = NULL;
 	obj->f = NULL;
 	return obj;
 }
@@ -127,12 +128,60 @@ static unsigned int load_texture(const char *filename)
 	return tex_id;
 }
 /**
+ * @brief Load material library file.
+ */
+static int load_material(struct objfile *obj, const char *filename)
+{
+	file_t file;
+	char buf[256];
+	int curmat;
+
+	init_file(&file);
+	open_file(&file, filename, "rt");
+	if(get_errori_file(&file) != FILE_ERROR_OKAY)
+		return 1;
+	curmat = 0;
+	while(readf_file(&file, "%s", buf) != EOF) {
+		struct material mat;
+		memset(&mat, 0, sizeof(struct material));
+		if(!strcmp(buf, "newmtl")) {
+			if(obj->ismat) {
+				mat.texture = curmat;
+				vector_push_back(obj->mat, mat);
+				obj->ismat = 0;
+				curmat++;
+			} else {
+				readf_file(&file, "%s", mat.name);
+				obj->ismat = 1;
+			}
+		} else if(!strcmp(buf, "Ns")) {
+			readf_file(&file, "%f", &mat.ns);
+		} else if(!strcmp(buf, "Ka")) {
+			readf_file(&file, "%f %f %f",
+				&mat.amb[0], &mat.amb[1], &mat.amb[2]);
+		} else if(!strcmp(buf, "Kd")) {
+			readf_file(&file, "%f %f %f",
+				&mat.dif[0], &mat.dif[1], &mat.dif[2]);
+		} else if(!strcmp(buf, "Ks")) {
+			readf_file(&file, "%f %f %f",
+				&mat.spec[0], &mat.spec[1], &mat.spec[2]);
+		} else if(!strcmp(buf, "Ni")) {
+			readf_file(&file, "%f", &mat.ni);
+		} else if(!strcmp(buf, "illum")) {
+			readf_file(&file, "%f", &mat.illum);
+		}
+	}
+	obj->ismat = 1;
+	return 0;
+}
+/**
  * @brief Create object from file.
  */
 int load_object(struct objfile *obj, const char *filename)
 {
 	file_t file;
 	char buf[256];
+	int curmat;
 
 	UNUSED(load_texture(NULL));
 	init_file(&file);
@@ -141,6 +190,7 @@ int load_object(struct objfile *obj, const char *filename)
 		fprintf(stderr, "Error: %s\n", get_error_file(&file));
 		return 1;
 	}
+	curmat = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "v")) {
 			struct vec3 v;
@@ -163,6 +213,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f.num, &f.face.f3, &f.num,
 					&f.face.f4, &f.num);
 					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
+					f.mat = curmat;
 					vector_push_back(obj->f, f);
 				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
@@ -171,6 +222,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f.face.f2, &f.tex.f2, &f.num,
 					&f.face.f3, &f.tex.f3, &f.num,
 					&f.face.f4, &f.tex.f4, &f.num);
+					f.mat = curmat;
 					vector_push_back(obj->f, f);
 				} else {
 					sscanf(buf,
@@ -179,6 +231,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f.face.f4);
 					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
 					f.num=0;
+					f.mat = curmat;
 					vector_push_back(obj->f, f);
 				}
 			} else {
@@ -189,6 +242,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f.num, &f.face.f3, &f.num);
 					f.face.f4 = 0;
 					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
+					f.mat = curmat;
 					vector_push_back(obj->f, f);
 				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
@@ -198,6 +252,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f.face.f3, &f.tex.f3, &f.num);
 					f.face.f4 = 0;
 					f.tex.f4 = 0;
+					f.mat = curmat;
 					vector_push_back(obj->f, f);
 				} else {
 					sscanf(buf,
@@ -205,8 +260,29 @@ int load_object(struct objfile *obj, const char *filename)
 					&f.face.f1, &f.face.f2, &f.face.f3);
 					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
 					f.face.f4 = f.num = 0;
+					f.mat = curmat;
 					vector_push_back(obj->f, f);
 				}
+			}
+		} else if(!strcmp(buf, "usemtl")) {
+			char tmpname[256];
+			size_t i;
+
+			sscanf(buf, "%s", tmpname);
+			for(i=0; i<vector_size(obj->mat); i++) {
+				if(!strcmp(obj->mat[i].name, tmpname)) {
+					curmat = i;
+					break;
+				}
+			}
+		} else if(!strcmp(buf, "mtllib")) {
+			char tmpname[256];
+
+			readf_file(&file, "%s", tmpname);
+			if(load_material(obj, tmpname)) {
+				fprintf(stderr,
+				"Warning: Could not load material library: %s",
+				tmpname);
 			}
 		}
 	}
@@ -306,6 +382,7 @@ void destroy_object(struct objfile *obj)
 	vector_free(obj->v);
 	vector_free(obj->vn);
 	vector_free(obj->f);
+	vector_free(obj->mat);
 	vector_free(obj->t);
 	vector_free(obj->l);
 	memset(obj, 0, sizeof(struct objfile));
