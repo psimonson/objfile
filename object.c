@@ -159,8 +159,10 @@ static int make_object(struct objfile *obj)
 		}
 		if(obj->f[i].four) {
 			glBegin(GL_QUADS);
-			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
-				obj->vn[obj->f[i].num-1].z);
+			if(obj->isnorm) {
+				glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
+					obj->vn[obj->f[i].num-1].z);
+			}
 			if(obj->istex) {
 				glTexCoord2f(obj->t[obj->f[i].tex.f1-1].u,
 					obj->t[obj->f[i].tex.f1-1].v);
@@ -192,8 +194,10 @@ static int make_object(struct objfile *obj)
 			glEnd();
 		} else {
 			glBegin(GL_TRIANGLES);
-			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
-				obj->vn[obj->f[i].num-1].z);
+			if(obj->isnorm) {
+				glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
+					obj->vn[obj->f[i].num-1].z);
+			}
 			if(obj->istex) {
 				glTexCoord2f(obj->t[obj->f[i].tex.f1-1].u,
 					obj->t[obj->f[i].tex.f1-1].v);
@@ -334,6 +338,7 @@ int load_object(struct objfile *obj, const char *filename)
 			float x, y, z;
 			readf_file(&file, "%f %f %f", &x, &y, &z);
 			vector_push_back(obj->vn, new_vec3(x, y, z));
+			obj->isnorm = 1;
 		} else if(!strcmp(buf, "f")) {
 			int f[4], t[4], num, mat, four;
 			if(gets_file(&file, buf, sizeof(buf)) == NULL)
