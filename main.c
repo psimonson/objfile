@@ -38,6 +38,8 @@ void change_size(int w, int h)
 
 void render_scene()
 {
+	extern struct objfile *obj;
+
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 

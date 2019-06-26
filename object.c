@@ -33,6 +33,71 @@ int strichr(const char *s, int ch)
 			i++;
 	return i;
 }
+/**
+ * @brief Create a new vector 3.
+ */
+static struct vec3 new_vec3(float x, float y, float z)
+{
+	struct vec3 v;
+	v.x = x;
+	v.y = y;
+	v.z = z;
+	return v;
+}
+/**
+ * @brief Creates a new face structure and fills it with data.
+ */
+static struct face new_face(int four, int num, int mat, int f[4], int t[4])
+{
+	struct face face;
+	face.four = four;
+	face.num = num;
+	face.mat = mat;
+	face.face.f1 = f[0];
+	face.face.f2 = f[1];
+	face.face.f3 = f[2];
+	face.face.f4 = f[3];
+	face.tex.f1 = t[0];
+	face.tex.f2 = t[1];
+	face.tex.f3 = t[2];
+	face.tex.f4 = t[3];
+	return face;
+}
+/**
+ * @brief Creates a new material structure and fills it with data.
+ */
+static struct material new_material(const char *name, float alpha,
+	float ns, float ni, float dif[], float amb[], float spec[],
+	int illum, int tex)
+{
+	struct material m;
+	strncpy(m.name, name, strlen(name));
+	m.alpha = alpha;
+	m.ns = ns;
+	m.ni = ni;
+	m.dif[0] = dif[0];
+	m.dif[1] = dif[1];
+	m.dif[2] = dif[2];
+	m.amb[0] = amb[0];
+	m.amb[1] = amb[1];
+	m.amb[2] = amb[2];
+	m.spec[0] = spec[0];
+	m.spec[1] = spec[1];
+	m.spec[2] = spec[2];
+	m.illum = illum;
+	m.texture = tex;
+	return m;
+}
+/**
+ * @brief Create a new uv coordinate.
+ */
+static struct texcoord new_coord(int a, int b)
+{
+	struct texcoord t;
+	t.u = a;
+	t.v = b;
+	return t;
+}
 
 /* --------------------------- Object Functions -------------------------- */
 
@@ -49,7 +114,8 @@ struct objfile *init_object(void)
 	}
 	obj->ismat = obj->istex = obj->isnorm = 0;
 	obj->v = obj->vn = NULL;
-	obj->t = obj->l = NULL;
+	obj->t = NULL;
+	obj->l = NULL;
 	obj->mat = NULL;
 	obj->f = NULL;
 	return obj;
@@ -57,9 +123,9 @@ struct objfile *init_object(void)
 /**
  * @brief Generate a GL list for drawing.
  */
-static unsigned int make_object(struct objfile *obj)
+static int make_object(struct objfile *obj)
 {
-	unsigned int unique_number;
+	int unique_number;
 	size_t i;
 	int last;
 
@@ -78,31 +144,50 @@ static unsigned int make_object(struct objfile *obj)
 			float spec[] = {obj->mat[obj->f[i].mat].spec[0],
 				obj->mat[obj->f[i].mat].spec[1],
 				obj->mat[obj->f[i].mat].spec[2], 1.0f};
-			glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
-			glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
-			glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, dif);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, amb);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
 			last = obj->f[i].mat;
-			if(obj->mat[obj->f[i].mat].texture==-1)
+			printf("mat.texture = %d\nf.mat = %d\n",
+			obj->mat[obj->f[i].mat].texture,
+			obj->f[i].mat);
+			if(obj->istex && obj->mat[obj->f[i].mat].texture != -1) {
 				glDisable(GL_TEXTURE_2D);
-			else {
+			} else {
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D,
-				obj->mat[obj->f[i].mat].texture);
+				obj->mat[obj->f[i].mat-1].texture);
 			}
 		}
 		if(obj->f[i].four) {
 			glBegin(GL_QUADS);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+				glTexCoord2f(obj->t[obj->f[i].mat].u,
+					obj->t[obj->f[i].mat].v);
+			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+				glTexCoord2f(obj->t[obj->f[i].mat].u,
+					obj->t[obj->f[i].mat].v);
+			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+				glTexCoord2f(obj->t[obj->f[i].mat].u,
+					obj->t[obj->f[i].mat].v);
+			}
 			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
 				obj->v[obj->f[i].face.f3-1].y,
 				obj->v[obj->f[i].face.f3-1].z);
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+				glTexCoord2f(obj->t[obj->f[i].mat].u,
+					obj->t[obj->f[i].mat].v);
+			}
 			glVertex3f(obj->v[obj->f[i].face.f4-1].x,
 				obj->v[obj->f[i].face.f4-1].y,
 				obj->v[obj->f[i].face.f4-1].z);
@@ -111,12 +196,24 @@ static unsigned int make_object(struct objfile *obj)
 			glBegin(GL_TRIANGLES);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+				glTexCoord2f(obj->t[obj->f[i].mat].u,
+					obj->t[obj->f[i].mat].v);
+			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+				glTexCoord2f(obj->t[obj->f[i].mat].u,
+					obj->t[obj->f[i].mat].v);
+			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+				glTexCoord2f(obj->t[obj->f[i].mat].u,
+					obj->t[obj->f[i].mat].v);
+			}
 			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
 				obj->v[obj->f[i].face.f3-1].y,
 				obj->v[obj->f[i].face.f3-1].z);
@@ -129,18 +226,19 @@ static unsigned int make_object(struct objfile *obj)
 /**
  * @brief Load a texture from a filename.
  */
-static unsigned int load_texture(const char *filename)
+static int load_texture(const char *filename)
 {
 	unsigned int tex_id;
 	Bitmap *bmp;
 
 	bmp = load_bitmap(filename);
-	if(!bmp) return (0xff << 24) + 1;
+	if(get_last_error_bitmap() != 0)
+		return -1;
 	glGenTextures(1, &tex_id);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
 	/* Map the image to the texture */
 	glTexImage2D(GL_TEXTURE_2D,
-			0,	/* 0 for now */
+			3,	/* 0 for now */
 			GL_RGB, /* Format OpenGL uses for textures */
 			bmp->info.width,
 			bmp->info.height,
@@ -156,6 +254,9 @@ static unsigned int load_texture(const char *filename)
  */
 static int load_material(struct objfile *obj, const char *filename)
 {
+	float alpha, ns, ni, dif[3], amb[3], spec[3];
+	int illum, tex;
+	char name[256];
 	file_t file;
 	char buf[256];
 	int ismat;
@@ -166,48 +267,49 @@ static int load_material(struct objfile *obj, const char *filename)
 		return 1;
 	ismat = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
-		struct material mat;
-		memset(&mat, 0, sizeof(struct material));
-		mat.texture = -1;
 		if(!strcmp(buf, "newmtl")) {
-			if(ismat)
-				vector_push_back(obj->mat, mat);
+			if(ismat) {
+				vector_push_back(obj->mat,
+				new_material(name, alpha, ns, ni, dif, amb,
+				spec, illum, tex));
+			}
 			ismat = 0;
-			readf_file(&file, "%s", mat.name);
+			readf_file(&file, "%s", name);
 		} else if(!strcmp(buf, "Ns")) {
-			readf_file(&file, "%f", &mat.ns);
+			readf_file(&file, "%f", &ns);
 			ismat = 1;
 		} else if(!strcmp(buf, "Ka")) {
 			readf_file(&file, "%f %f %f",
-				&mat.amb[0], &mat.amb[1], &mat.amb[2]);
+				&amb[0], &amb[1], &amb[2]);
 			ismat = 1;
 		} else if(!strcmp(buf, "Kd")) {
 			readf_file(&file, "%f %f %f",
-				&mat.dif[0], &mat.dif[1], &mat.dif[2]);
+				&dif[0], &dif[1], &dif[2]);
 			ismat = 1;
 		} else if(!strcmp(buf, "Ks")) {
 			readf_file(&file, "%f %f %f",
-				&mat.spec[0], &mat.spec[1], &mat.spec[2]);
+				&spec[0], &spec[1], &spec[2]);
 			ismat = 1;
 		} else if(!strcmp(buf, "Ni")) {
-			readf_file(&file, "%f", &mat.ni);
+			readf_file(&file, "%f", &ni);
 			ismat = 1;
 		} else if(!strcmp(buf, "d")) {
-			readf_file(&file, "%f", &mat.alpha);
+			readf_file(&file, "%f", &alpha);
 			ismat = 1;
 		} else if(!strcmp(buf, "illum")) {
-			readf_file(&file, "%f", &mat.illum);
+			readf_file(&file, "%f", &illum);
 			ismat = 1;
 		} else if(!strcmp(buf, "map_Kd")) {
-			char tmp[256];
-			readf_file(&file, "%s", tmp);
-			mat.texture = load_texture(tmp);
-			ismat = 1;
-		} else if(!strcmp(buf, "vt")) {
-			readf_file(&file, "%f %f", &mat.tex.u, &mat.tex.v);
-			mat.tex.v = 1-mat.tex.v;
+			char tmpname[256];
+
+			readf_file(&file, "%s", tmpname);
+			tex = load_texture(tmpname);
 			obj->istex = 1;
 		}
+	}
+	if(ismat) {
+		vector_push_back(obj->mat,
+		new_material(name, alpha, ns, ni, dif, amb, spec, illum, tex));
 	}
 	if(vector_size(obj->mat) == 0)
 		obj->ismat = 0;
@@ -224,7 +326,6 @@ int load_object(struct objfile *obj, const char *filename)
 	char buf[256];
 	int curmat;
 
-	UNUSED(load_texture(NULL));
 	init_file(&file);
 	open_file(&file, filename, "rt");
 	if(get_errori_file(&file) != FILE_ERROR_OKAY) {
@@ -234,83 +335,91 @@ int load_object(struct objfile *obj, const char *filename)
 	curmat = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "v")) {
-			struct vec3 v;
-			readf_file(&file, "%f %f %f", &v.x, &v.y, &v.z);
-			vector_push_back(obj->v, v);
+			float x, y, z;
+			readf_file(&file, "%f %f %f", &x, &y, &z);
+			vector_push_back(obj->v, new_vec3(x, y, z));
 		} else if(!strcmp(buf, "vn")) {
-			struct vec3 v;
-			readf_file(&file, "%f %f %f", &v.x, &v.y, &v.z);
-			vector_push_back(obj->vn, v);
+			float x, y, z;
+			readf_file(&file, "%f %f %f", &x, &y, &z);
+			vector_push_back(obj->vn, new_vec3(x, y, z));
 		} else if(!strcmp(buf, "f")) {
-			struct face f;
+			int f[4], t[4], num, mat, four;
 			if(gets_file(&file, buf, sizeof(buf)) == NULL)
 				continue;
-			memset(&f, 0, sizeof(struct face));
 			if(strichr(buf, ' ') == 4) {
-				f.four = 1;
+				four = 1;
 				if(strstr(buf, "//") != NULL) {
 					sscanf(buf,
 					"%d//%d %d//%d %d//%d %d//%d",
-					&f.face.f1, &f.num, &f.face.f2,
-					&f.num, &f.face.f3, &f.num,
-					&f.face.f4, &f.num);
-					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
-					f.mat = curmat;
-					vector_push_back(obj->f, f);
+					&f[0], &num, &f[1],
+					&num, &f[2], &num,
+					&f[3], &num);
+					t[0]=t[1]=t[2]=t[3]=0;
+					mat = curmat;
+					vector_push_back(obj->f,
+					new_face(four, num, mat, f, t));
 				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
 					"%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
-					&f.face.f1, &f.tex.f1, &f.num,
-					&f.face.f2, &f.tex.f2, &f.num,
-					&f.face.f3, &f.tex.f3, &f.num,
-					&f.face.f4, &f.tex.f4, &f.num);
-					f.mat = curmat;
-					vector_push_back(obj->f, f);
+					&f[0], &t[0], &num,
+					&f[1], &t[1], &num,
+					&f[2], &t[2], &num,
+					&f[3], &t[3], &num);
+					mat = curmat;
+					vector_push_back(obj->f,
+					new_face(four, num, mat, f, t));
 				} else {
 					sscanf(buf,
 					"%d %d %d %d",
-					&f.face.f1, &f.face.f2, &f.face.f3,
-					&f.face.f4);
-					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
-					f.num=0;
-					f.mat = curmat;
-					vector_push_back(obj->f, f);
+					&f[0], &f[2], &f[3],
+					&f[4]);
+					t[0]=t[1]=t[2]=t[3]=0;
+					num=0;
+					mat = curmat;
+					vector_push_back(obj->f,
+					new_face(four, num, mat, f, t));
 				}
 			} else {
-				f.four = 0;
+				four = 0;
 				if(strstr(buf, "//") != NULL) {
 					sscanf(buf, "%d//%d %d//%d %d//%d",
-					&f.face.f1, &f.num, &f.face.f2,
-					&f.num, &f.face.f3, &f.num);
-					f.face.f4 = 0;
-					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
-					f.mat = curmat;
-					vector_push_back(obj->f, f);
+					&f[0], &num, &f[1],
+					&num, &f[2], &num);
+					f[4] = 0;
+					t[0]=t[1]=t[2]=t[3]=0;
+					mat = curmat;
+					vector_push_back(obj->f,
+					new_face(four, num, mat, f, t));
 				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
 					"%d/%d/%d %d/%d/%d %d/%d/%d",
-					&f.face.f1, &f.tex.f1, &f.num,
-					&f.face.f2, &f.tex.f2, &f.num,
-					&f.face.f3, &f.tex.f3, &f.num);
-					f.face.f4 = 0;
-					f.tex.f4 = 0;
-					f.mat = curmat;
-					vector_push_back(obj->f, f);
+					&f[0], &t[0], &num,
+					&f[1], &t[1], &num,
+					&f[2], &t[2], &num);
+					f[3] = 0;
+					t[3] = 0;
+					mat = curmat;
+					vector_push_back(obj->f,
+					new_face(four, num, mat, f, t));
 				} else {
 					sscanf(buf,
 					"%d %d %d",
-					&f.face.f1, &f.face.f2, &f.face.f3);
-					f.tex.f1=f.tex.f2=f.tex.f3=f.tex.f4=0;
-					f.face.f4 = f.num = 0;
-					f.mat = curmat;
-					vector_push_back(obj->f, f);
+					&f[0], &f[1], &f[2]);
+					t[0]=t[1]=t[2]=t[3]=0;
+					f[4] = num = 0;
+					mat = curmat;
+					vector_push_back(obj->f,
+					new_face(four, num, mat, f, t));
 				}
 			}
+		} else if(!strcmp(buf, "vt")) {
+			float u, v;
+			readf_file(&file, "%f %f", &u, &v);
+			vector_push_back(obj->t, new_coord(u, 1-v));
 		} else if(!strcmp(buf, "usemtl")) {
 			char tmpname[256];
 			size_t i;
-
-			sscanf(buf, "%s", tmpname);
+			readf_file(&file, "%s", tmpname);
 			for(i=0; i<vector_size(obj->mat); i++) {
 				if(!strcmp(obj->mat[i].name, tmpname)) {
 					curmat = i;
@@ -319,11 +428,10 @@ int load_object(struct objfile *obj, const char *filename)
 			}
 		} else if(!strcmp(buf, "mtllib")) {
 			char tmpname[256];
-
 			readf_file(&file, "%s", tmpname);
 			if(load_material(obj, tmpname)) {
 				fprintf(stderr,
-				"Warning: Could not load material library: %s",
+				"Warning: Could not load mtllib: %s\n",
 				tmpname);
 			}
 		}
@@ -414,6 +522,36 @@ void print_object(struct objfile *obj)
 			}
 		}
 	}
+	printf("=====================================================\n");
+	for(i=0; i<vector_size(obj->mat); i++) {
+		printf("Name: %s\nAlpha: %f\nNs: %f\nNi: %f\n"
+			"Diffuse: %f %f %f\n"
+			"Ambient: %f %f %f\n"
+			"Specular: %f %f %f\n"
+			"Texture ID: %d\n",
+			obj->mat[i].name, obj->mat[i].alpha,
+			obj->mat[i].ns, obj->mat[i].ni,
+			obj->mat[i].dif[0], obj->mat[i].dif[1],
+			obj->mat[i].dif[2], obj->mat[i].amb[0],
+			obj->mat[i].amb[1], obj->mat[i].amb[2],
+			obj->mat[i].spec[0], obj->mat[i].spec[1],
+			obj->mat[i].spec[2], obj->mat[i].texture);
+	}
+	printf("=====================================================\n");
+	for(i=0; i<vector_size(obj->t); i++) {
+		printf("Texture UV Coords: %f %f\n",
+			obj->t[i].u, obj->t[i].v);
+	}
+	printf("=====================================================\n");
+	for(i=0; i<vector_size(obj->f); i++) {
+		printf("Face Number: %lu\nTexture Material Indexes [1-4]:\n"
+			"%d %d %d %d\n", i,
+			obj->f[i].tex.f1,
+			obj->f[i].tex.f2,
+			obj->f[i].tex.f3,
+			obj->f[i].tex.f4
+		);
+	} 
 	printf("=====================================================\n");
 }
 /**

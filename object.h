@@ -38,9 +38,10 @@ struct material {
 	float alpha, ns, ni;
 	float dif[3], amb[3], spec[3];
 	int illum,texture;
-	struct {
-		float u, v;
-	} tex;
+};
+
+struct texcoord {
+	float u, v;
 };
 
 struct objfile {
@@ -48,7 +49,7 @@ struct objfile {
 	struct vec3 *vn;
 	struct face *f;
 	struct material *mat;
-	unsigned int *t;
+	struct texcoord *t;
 	unsigned int *l;
 	char istex;
 	char isnorm;
