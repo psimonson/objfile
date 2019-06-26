@@ -59,7 +59,7 @@ struct objfile {
 PRS_EXPORT struct objfile *init_object(void);
 PRS_EXPORT int load_object(struct objfile *obj, const char*);
 PRS_EXPORT void destroy_object(struct objfile*);
-PRS_EXPORT void draw_object(int id);
+PRS_EXPORT void draw_object(struct objfile*);
 PRS_EXPORT void print_object(struct objfile*);
 
 #ifdef __cplusplus

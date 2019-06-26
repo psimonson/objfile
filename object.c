@@ -439,9 +439,11 @@ int load_object(struct objfile *obj, const char *filename)
 /**
  * @brief Draw object to screen.
  */
-void draw_object(int id)
+void draw_object(struct objfile *obj)
 {
-	glCallList(id);
+	size_t i;
+	for(i=0; i<vector_size(obj->l); i++)
+		glCallList(obj->l[i]);
 }
 /**
  * @brief Print object data.

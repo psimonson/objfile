@@ -49,7 +49,7 @@ void render_scene()
 
 	/* draw object */
 	glTranslatef(0.0f, 0.0f, -20.0f);
-	draw_object(obj->l[0]);
+	draw_object(obj);
 
 	glutSwapBuffers();
 }
