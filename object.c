@@ -149,9 +149,6 @@ static int make_object(struct objfile *obj)
 			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, amb);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
 			last = obj->f[i].mat;
-			printf("mat.texture = %d\nf.mat = %d\n",
-			obj->mat[obj->f[i].mat].texture,
-			obj->f[i].mat);
 			if(!obj->istex) {
 				glDisable(GL_TEXTURE_2D);
 			} else {
@@ -164,28 +161,28 @@ static int make_object(struct objfile *obj)
 			glBegin(GL_QUADS);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture) {
+			if(obj->istex) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture) {
+			if(obj->istex) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture) {
+			if(obj->istex) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
 				obj->v[obj->f[i].face.f3-1].y,
 				obj->v[obj->f[i].face.f3-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture) {
+			if(obj->istex) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
@@ -197,21 +194,21 @@ static int make_object(struct objfile *obj)
 			glBegin(GL_TRIANGLES);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+			if(obj->istex) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+			if(obj->istex) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+			if(obj->istex) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
