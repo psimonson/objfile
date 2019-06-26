@@ -56,6 +56,8 @@ void render_scene()
 
 int init_glut(int argc, char **argv)
 {
+	extern struct objfile *obj;
+
 	glutInit(&argc, argv);
 	glutInitWindowPosition(-1, -1);
 	glutInitWindowSize(800, 600);
@@ -64,6 +66,13 @@ int init_glut(int argc, char **argv)
 	glutDisplayFunc(render_scene);
 	glutIdleFunc(render_scene);
 	glutReshapeFunc(change_size);
+
+	obj = init_object();
+	if(!obj) return 1;
+	if(load_object(obj, "test.obj")) {
+		fprintf(stderr, "Error: Cannot load object...\n");
+		return 1;
+	}
 	return 0;
 }
 
@@ -73,13 +82,6 @@ int main(int argc, char **argv)
 
 	if(init_glut(argc, argv))
 		return 1;
-
-	obj = init_object();
-	if(!obj) return 1;
-	if(load_object(obj, "test.obj")) {
-		fprintf(stderr, "Error: Cannot load object...\n");
-		return 1;
-	}
 	print_object(obj);
 	glutMainLoop();
 	cleanup();

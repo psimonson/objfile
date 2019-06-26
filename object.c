@@ -13,6 +13,7 @@
 #include <string.h>
 
 #include <GL/gl.h>
+#include <GL/glu.h>
 
 #include "bitmap.h"
 #include "object.h"
@@ -230,34 +231,17 @@ static int load_texture(const char *filename)
 {
 	unsigned int tex_id;
 	Bitmap *bmp;
-	int x,y;
 
+	glGenTextures(1, &tex_id);
+	glBindTexture(GL_TEXTURE_2D, tex_id);
+	glTexEnvf(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	bmp = load_bitmap(filename);
 	if(get_last_error_bitmap() != BMP_NO_ERROR)
 		return -1;
-	for(y=0; y<bmp->info.height; y++) {
-		for(x=0; x<bmp->info.width; x++) {
-			unsigned char tmp;
-			Color color;
-			get_pixel_bitmap(bmp, y, x, &color);
-			tmp = color.r;
-			color.r = color.b;
-			color.b = tmp;
-			set_pixel_bitmap(bmp, y, x, color);
-		}
-	}
-	glGenTextures(1, &tex_id);
-	glBindTexture(GL_TEXTURE_2D, tex_id);
-	/* Map the image to the texture */
-	glTexImage2D(GL_TEXTURE_2D,
-			3,	/* 0 for now */
-			GL_RGB, /* Format OpenGL uses for textures */
-			bmp->info.width,
-			bmp->info.height,
-			0,
-			GL_RGB,
-			GL_UNSIGNED_BYTE,
-			bmp->data);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, bmp->info.width,
+		bmp->info.height, 0, GL_BGR, GL_UNSIGNED_BYTE, bmp->data);
 	destroy_bitmap(bmp);
 	return tex_id;
 }
