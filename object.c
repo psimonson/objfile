@@ -257,7 +257,7 @@ static int load_material(struct objfile *obj, const char *filename)
 	open_file(&file, filename, "rt");
 	if(get_errori_file(&file) != FILE_ERROR_OKAY)
 		return 1;
-	ismat = 1;
+	ismat = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "newmtl")) {
 			if(ismat) {
@@ -296,12 +296,17 @@ static int load_material(struct objfile *obj, const char *filename)
 
 			readf_file(&file, "%s", tmpname);
 			tex = load_texture(tmpname);
+			ismat = 1;
 		}
 	}
 	if(ismat) {
 		vector_push_back(obj->mat,
 		new_material(name, alpha, ns, ni, dif, amb, spec, illum, tex));
 	}
+	if(vector_size(obj->mat) == 0)
+		obj->ismat = 0;
+	else
+		obj->ismat = 1;
 	return 0;
 }
 /**
@@ -342,7 +347,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&num, &f[2], &num,
 					&f[3], &num);
 					t[0]=t[1]=t[2]=t[3]=0;
-					mat = curmat;
+					mat = (obj->ismat ? curmat : -1);
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				} else if(strstr(buf, "/") != NULL) {
@@ -352,7 +357,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f[1], &t[1], &num,
 					&f[2], &t[2], &num,
 					&f[3], &t[3], &num);
-					mat = curmat;
+					mat = (obj->ismat ? curmat : -1);
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				} else {
@@ -361,8 +366,8 @@ int load_object(struct objfile *obj, const char *filename)
 					&f[0], &f[2], &f[3],
 					&f[4]);
 					t[0]=t[1]=t[2]=t[3]=0;
-					num=0;
-					mat = curmat;
+					num=-1;
+					mat = (obj->ismat ? curmat : -1);
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				}
@@ -374,7 +379,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&num, &f[2], &num);
 					f[4] = 0;
 					t[0]=t[1]=t[2]=t[3]=0;
-					mat = curmat;
+					mat = (obj->ismat ? curmat : -1);
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				} else if(strstr(buf, "/") != NULL) {
@@ -385,7 +390,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f[2], &t[2], &num);
 					f[3] = 0;
 					t[3] = 0;
-					mat = curmat;
+					mat = (obj->ismat ? curmat : -1);
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				} else {
@@ -393,8 +398,9 @@ int load_object(struct objfile *obj, const char *filename)
 					"%d %d %d",
 					&f[0], &f[1], &f[2]);
 					t[0]=t[1]=t[2]=t[3]=0;
-					f[4] = num = 0;
-					mat = curmat;
+					f[4] = 0;
+					num = -1;
+					mat = (obj->ismat ? curmat : -1);
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				}
