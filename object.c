@@ -91,11 +91,11 @@ static struct material new_material(const char *name, float alpha,
 /**
  * @brief Create a new uv coordinate.
  */
-static struct texcoord new_coord(int a, int b)
+static struct texcoord new_coord(float u, float v)
 {
 	struct texcoord t;
-	t.u = a;
-	t.v = b;
+	t.u = u;
+	t.v = v;
 	return t;
 }
 
@@ -230,10 +230,22 @@ static int load_texture(const char *filename)
 {
 	unsigned int tex_id;
 	Bitmap *bmp;
+	int x,y;
 
 	bmp = load_bitmap(filename);
-	if(get_last_error_bitmap() != 0)
+	if(get_last_error_bitmap() != BMP_NO_ERROR)
 		return -1;
+	for(y=0; y<bmp->info.height; y++) {
+		for(x=0; x<bmp->info.width; x++) {
+			unsigned char tmp;
+			Color color;
+			get_pixel_bitmap(bmp, y, x, &color);
+			tmp = color.r;
+			color.r = color.b;
+			color.b = tmp;
+			set_pixel_bitmap(bmp, y, x, color);
+		}
+	}
 	glGenTextures(1, &tex_id);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
 	/* Map the image to the texture */
