@@ -152,7 +152,7 @@ static int make_object(struct objfile *obj)
 			printf("mat.texture = %d\nf.mat = %d\n",
 			obj->mat[obj->f[i].mat].texture,
 			obj->f[i].mat);
-			if(obj->ismat && !obj->mat[obj->f[i].mat].texture) {
+			if(!obj->istex) {
 				glDisable(GL_TEXTURE_2D);
 			} else {
 				glEnable(GL_TEXTURE_2D);
@@ -164,28 +164,28 @@ static int make_object(struct objfile *obj)
 			glBegin(GL_QUADS);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
-			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
-			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
-			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
 				obj->v[obj->f[i].face.f3-1].y,
 				obj->v[obj->f[i].face.f3-1].z);
-			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
+			if(obj->ismat && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
@@ -261,7 +261,7 @@ static int load_material(struct objfile *obj, const char *filename)
 	open_file(&file, filename, "rt");
 	if(get_errori_file(&file) != FILE_ERROR_OKAY)
 		return 1;
-	ismat = 0;
+	ismat = 1;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "newmtl")) {
 			if(ismat) {
@@ -300,17 +300,14 @@ static int load_material(struct objfile *obj, const char *filename)
 
 			readf_file(&file, "%s", tmpname);
 			tex = load_texture(tmpname);
-			obj->istex = 1;
+			if(!tex)
+				obj->istex = 1;
 		}
 	}
 	if(ismat) {
 		vector_push_back(obj->mat,
 		new_material(name, alpha, ns, ni, dif, amb, spec, illum, tex));
 	}
-	if(vector_size(obj->mat) == 0)
-		obj->ismat = 0;
-	else
-		obj->ismat = 1;
 	return 0;
 }
 /**
