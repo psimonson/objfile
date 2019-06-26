@@ -152,7 +152,7 @@ static int make_object(struct objfile *obj)
 			printf("mat.texture = %d\nf.mat = %d\n",
 			obj->mat[obj->f[i].mat].texture,
 			obj->f[i].mat);
-			if(obj->istex && obj->mat[obj->f[i].mat].texture == -1) {
+			if(obj->ismat && !obj->mat[obj->f[i].mat].texture) {
 				glDisable(GL_TEXTURE_2D);
 			} else {
 				glEnable(GL_TEXTURE_2D);
@@ -164,28 +164,28 @@ static int make_object(struct objfile *obj)
 			glBegin(GL_QUADS);
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
 				obj->v[obj->f[i].face.f3-1].y,
 				obj->v[obj->f[i].face.f3-1].z);
-			if(obj->ismat && obj->mat[obj->f[i].mat].texture != 0) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].mat].u,
 					obj->t[obj->f[i].mat].v);
 			}
@@ -227,20 +227,20 @@ static int make_object(struct objfile *obj)
 /**
  * @brief Load a texture from a filename.
  */
-static int load_texture(const char *filename)
+static unsigned int load_texture(const char *filename)
 {
-	unsigned int tex_id;
 	Bitmap *bmp;
+	unsigned int tex_id;
 
+	bmp = load_bitmap(filename);
+	if(get_last_error_bitmap() != BMP_NO_ERROR)
+		return 0;
 	glGenTextures(1, &tex_id);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
 	glTexEnvf(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	bmp = load_bitmap(filename);
-	if(get_last_error_bitmap() != BMP_NO_ERROR)
-		return -1;
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, bmp->info.width,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bmp->info.width,
 		bmp->info.height, 0, GL_BGR, GL_UNSIGNED_BYTE, bmp->data);
 	destroy_bitmap(bmp);
 	return tex_id;
@@ -557,6 +557,12 @@ void print_object(struct objfile *obj)
  */
 void destroy_object(struct objfile *obj)
 {
+	size_t i;
+
+	for(i=0; i<vector_size(obj->mat); i++)
+		glDeleteTextures(1, &obj->mat[i].texture);
+	for(i=0; i<vector_size(obj->l); i++)
+		glDeleteLists(1, obj->l[i]);
 	vector_free(obj->v);
 	vector_free(obj->vn);
 	vector_free(obj->f);
