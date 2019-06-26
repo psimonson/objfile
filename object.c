@@ -69,7 +69,7 @@ static struct face new_face(int four, int num, int mat, int f[4], int t[4])
  */
 static struct material new_material(const char *name, float alpha,
 	float ns, float ni, float dif[], float amb[], float spec[],
-	int illum, int tex)
+	int illum, unsigned int tex)
 {
 	struct material m;
 	strncpy(m.name, name, strlen(name));
@@ -86,7 +86,7 @@ static struct material new_material(const char *name, float alpha,
 	m.spec[1] = spec[1];
 	m.spec[2] = spec[2];
 	m.illum = illum;
-	m.texture = tex;
+	m.texture = (tex > 0 ? tex : 0);
 	return m;
 }
 /**
@@ -149,7 +149,7 @@ static int make_object(struct objfile *obj)
 			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, amb);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
 			last = obj->f[i].mat;
-			if(!obj->istex) {
+			if(obj->mat[obj->f[i].mat].texture == 0) {
 				glDisable(GL_TEXTURE_2D);
 			} else {
 				glEnable(GL_TEXTURE_2D);
@@ -162,29 +162,29 @@ static int make_object(struct objfile *obj)
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
 			if(obj->istex) {
-				glTexCoord2f(obj->t[obj->f[i].mat].u,
-					obj->t[obj->f[i].mat].v);
+				glTexCoord2f(obj->t[obj->f[i].tex.f1-1].u,
+					obj->t[obj->f[i].tex.f1-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
 			if(obj->istex) {
-				glTexCoord2f(obj->t[obj->f[i].mat].u,
-					obj->t[obj->f[i].mat].v);
+				glTexCoord2f(obj->t[obj->f[i].tex.f2-1].u,
+					obj->t[obj->f[i].tex.f2-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
 			if(obj->istex) {
-				glTexCoord2f(obj->t[obj->f[i].mat].u,
-					obj->t[obj->f[i].mat].v);
+				glTexCoord2f(obj->t[obj->f[i].tex.f3-1].u,
+					obj->t[obj->f[i].tex.f3-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
 				obj->v[obj->f[i].face.f3-1].y,
 				obj->v[obj->f[i].face.f3-1].z);
 			if(obj->istex) {
-				glTexCoord2f(obj->t[obj->f[i].mat].u,
-					obj->t[obj->f[i].mat].v);
+				glTexCoord2f(obj->t[obj->f[i].tex.f4-1].u,
+					obj->t[obj->f[i].tex.f4-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f4-1].x,
 				obj->v[obj->f[i].face.f4-1].y,
@@ -195,22 +195,22 @@ static int make_object(struct objfile *obj)
 			glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
 				obj->vn[obj->f[i].num-1].z);
 			if(obj->istex) {
-				glTexCoord2f(obj->t[obj->f[i].mat].u,
-					obj->t[obj->f[i].mat].v);
+				glTexCoord2f(obj->t[obj->f[i].tex.f1-1].u,
+					obj->t[obj->f[i].tex.f1-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
 			if(obj->istex) {
-				glTexCoord2f(obj->t[obj->f[i].mat].u,
-					obj->t[obj->f[i].mat].v);
+				glTexCoord2f(obj->t[obj->f[i].tex.f2-1].u,
+					obj->t[obj->f[i].tex.f2-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
 			if(obj->istex) {
-				glTexCoord2f(obj->t[obj->f[i].mat].u,
-					obj->t[obj->f[i].mat].v);
+				glTexCoord2f(obj->t[obj->f[i].tex.f3-1].u,
+					obj->t[obj->f[i].tex.f3-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
 				obj->v[obj->f[i].face.f3-1].y,
