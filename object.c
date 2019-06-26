@@ -234,8 +234,7 @@ static unsigned int load_texture(const char *filename)
 		return 0;
 	glGenTextures(1, &tex_id);
 	glBindTexture(GL_TEXTURE_2D, tex_id);
-	glTexEnvf(GL_TEXTURE_2D, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bmp->info.width,
 		bmp->info.height, 0, GL_BGR, GL_UNSIGNED_BYTE, bmp->data);
