@@ -152,12 +152,12 @@ static int make_object(struct objfile *obj)
 			printf("mat.texture = %d\nf.mat = %d\n",
 			obj->mat[obj->f[i].mat].texture,
 			obj->f[i].mat);
-			if(obj->istex && obj->mat[obj->f[i].mat].texture != -1) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture == -1) {
 				glDisable(GL_TEXTURE_2D);
 			} else {
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D,
-				obj->mat[obj->f[i].mat-1].texture);
+				obj->mat[obj->f[i].mat].texture);
 			}
 		}
 		if(obj->f[i].four) {
