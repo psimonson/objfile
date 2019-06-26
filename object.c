@@ -300,8 +300,6 @@ static int load_material(struct objfile *obj, const char *filename)
 
 			readf_file(&file, "%s", tmpname);
 			tex = load_texture(tmpname);
-			if(!tex)
-				obj->istex = 1;
 		}
 	}
 	if(ismat) {
@@ -409,6 +407,7 @@ int load_object(struct objfile *obj, const char *filename)
 			float u, v;
 			readf_file(&file, "%f %f", &u, &v);
 			vector_push_back(obj->t, new_coord(u, 1-v));
+			obj->istex = 1;
 		} else if(!strcmp(buf, "usemtl")) {
 			char tmpname[256];
 			size_t i;
