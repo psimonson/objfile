@@ -1,0 +1,24 @@
+===============================================================
+                       .:[OBJFILE v0.1]:.
+===============================================================
+Simple OBJ File loader written in Pure C. By Philip "5n4k3"
+Simonson. This OBJ loader is for OpenGL 1.2 and higher. Works
+well, I have not found any issues although if there are some
+please let me know. Send me an e-mail about any bug you find
+and I'll try to fix it ASAP (as soon as possible).
+===============================================================
+E-mail me if you find bugs at: psimonson1988@gmail.com
+===============================================================
+Functions:
+ init_object()
+  - Initialize a OBJ file object; returns: struct objfile*
+ load_object(struct objfile *obj, const char *fname)
+  - Load an entire OBJ file into memory; returns: -1 on error
+ draw_object(struct objfile *obj)
+  - Draw an object to the screen.
+ destroy_object(struct objfile *obj)
+  - Cleanup all used memory from object structure.
+===============================================================
+                           .:[EOF]:.
+===============================================================
+

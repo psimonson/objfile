@@ -5,8 +5,8 @@
  * Add texture coordinates for object loader.
  * Updated print_object(), to print all data.
  * Load materials for objects.
- - Finish loading textures for objects.
- - Fix bug with texture UV coordinates.
+ * Finish loading textures for objects.
+ * Fix bug with texture UV coordinates.
 =============================================
 NOTE: An '*' character means that it's done
 and '-' character means, "needs to be done".

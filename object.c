@@ -330,7 +330,7 @@ int load_object(struct objfile *obj, const char *filename)
 		fprintf(stderr, "Error: %s\n", get_error_file(&file));
 		return 1;
 	}
-	curmat = 0;
+	curmat = obj->ismat = obj->istex = obj->isnorm = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "v")) {
 			float x, y, z;
