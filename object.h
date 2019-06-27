@@ -51,7 +51,7 @@ struct objfile {
 	struct face *f;
 	struct material *mat;
 	struct texcoord *t;
-	unsigned int *l;
+	int l;
 	char istex;
 	char isnorm;
 	char ismat;

@@ -116,7 +116,7 @@ struct objfile *init_object(void)
 	obj->ismat = obj->istex = obj->isnorm = 0;
 	obj->v = obj->vn = NULL;
 	obj->t = NULL;
-	obj->l = NULL;
+	obj->l = -1;
 	obj->mat = NULL;
 	obj->f = NULL;
 	return obj;
@@ -223,7 +223,9 @@ static int make_object(struct objfile *obj)
 		}
 	}
 	glEndList();
-	return unique_number;
+	if(glGetError() == GL_NO_ERROR)
+		return unique_number;
+	return -1;
 }
 /**
  * @brief Load a texture from a filename.
@@ -436,7 +438,7 @@ int load_object(struct objfile *obj, const char *filename)
 		}
 	}
 	close_file(&file);
-	vector_push_back(obj->l, make_object(obj));
+	obj->l = make_object(obj);
 	return 0;
 }
 /**
@@ -444,9 +446,7 @@ int load_object(struct objfile *obj, const char *filename)
  */
 void draw_object(struct objfile *obj)
 {
-	size_t i;
-	for(i=0; i<vector_size(obj->l); i++)
-		glCallList(obj->l[i]);
+	glCallList(obj->l);
 }
 /**
  * @brief Print object data.
@@ -564,14 +564,12 @@ void destroy_object(struct objfile *obj)
 
 	for(i=0; i<vector_size(obj->mat); i++)
 		glDeleteTextures(1, &obj->mat[i].texture);
-	for(i=0; i<vector_size(obj->l); i++)
-		glDeleteLists(1, obj->l[i]);
+	glDeleteLists(1, obj->l);
 	vector_free(obj->v);
 	vector_free(obj->vn);
 	vector_free(obj->f);
 	vector_free(obj->mat);
 	vector_free(obj->t);
-	vector_free(obj->l);
 	memset(obj, 0, sizeof(struct objfile));
 	free(obj);
 }

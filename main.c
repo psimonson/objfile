@@ -50,7 +50,6 @@ void render_scene()
 	/* draw object */
 	glTranslatef(0.0f, 0.0f, -20.0f);
 	draw_object(obj);
-
 	glutSwapBuffers();
 }
 
@@ -75,7 +74,7 @@ int main(int argc, char **argv)
 		return 1;
 	obj = init_object();
 	if(!obj) return 1;
-	if(load_object(obj, "test.obj")) {
+	if(load_object(obj, "test.obj") < 0) {
 		fprintf(stderr, "Error: Cannot load object...\n");
 		return 1;
 	}
