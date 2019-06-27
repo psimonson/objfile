@@ -263,7 +263,7 @@ static int load_material(struct objfile *obj, const char *filename)
 	open_file(&file, filename, "rt");
 	if(get_errori_file(&file) != FILE_ERROR_OKAY)
 		return 1;
-	ismat = 0;
+	ismat = tex = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "newmtl")) {
 			if(ismat) {

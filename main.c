@@ -89,6 +89,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 /*	print_object(obj);*/
+/*	print_object(obj2);*/
 	glutMainLoop();
 	cleanup();
 	return 0;
