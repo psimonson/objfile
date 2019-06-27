@@ -330,7 +330,7 @@ int load_object(struct objfile *obj, const char *filename)
 		fprintf(stderr, "Error: %s\n", get_error_file(&file));
 		return 1;
 	}
-	curmat = obj->ismat = obj->istex = obj->isnorm = 0;
+	curmat = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "v")) {
 			float x, y, z;
@@ -354,7 +354,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&num, &f[2], &num,
 					&f[3], &num);
 					t[0]=t[1]=t[2]=t[3]=0;
-					mat = (obj->ismat ? curmat : -1);
+					mat = curmat;
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				} else if(strstr(buf, "/") != NULL) {
@@ -364,7 +364,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f[1], &t[1], &num,
 					&f[2], &t[2], &num,
 					&f[3], &t[3], &num);
-					mat = (obj->ismat ? curmat : -1);
+					mat = curmat;
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				} else {
@@ -374,7 +374,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f[4]);
 					t[0]=t[1]=t[2]=t[3]=0;
 					num=-1;
-					mat = (obj->ismat ? curmat : -1);
+					mat = curmat;
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				}
@@ -386,7 +386,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&num, &f[2], &num);
 					f[4] = 0;
 					t[0]=t[1]=t[2]=t[3]=0;
-					mat = (obj->ismat ? curmat : -1);
+					mat = curmat;
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				} else if(strstr(buf, "/") != NULL) {
@@ -397,7 +397,7 @@ int load_object(struct objfile *obj, const char *filename)
 					&f[2], &t[2], &num);
 					f[3] = 0;
 					t[3] = 0;
-					mat = (obj->ismat ? curmat : -1);
+					mat = curmat;
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				} else {
@@ -407,7 +407,7 @@ int load_object(struct objfile *obj, const char *filename)
 					t[0]=t[1]=t[2]=t[3]=0;
 					f[4] = 0;
 					num = -1;
-					mat = (obj->ismat ? curmat : -1);
+					mat = curmat;
 					vector_push_back(obj->f,
 					new_face(four, num, mat, f, t));
 				}
