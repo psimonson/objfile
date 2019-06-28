@@ -271,7 +271,7 @@ static int load_material(struct objfile *obj, const char *filename)
 				new_material(name, alpha, ns, ni, dif, amb,
 				spec, illum, tex));
 			}
-			ismat = 0;
+			ismat = tex = 0;
 			readf_file(&file, "%s", name);
 		} else if(!strcmp(buf, "Ns")) {
 			readf_file(&file, "%f", &ns);
@@ -302,7 +302,6 @@ static int load_material(struct objfile *obj, const char *filename)
 
 			readf_file(&file, "%s", tmpname);
 			tex = load_texture(tmpname);
-			ismat = 1;
 		}
 	}
 	if(ismat) {
@@ -342,7 +341,7 @@ int load_object(struct objfile *obj, const char *filename)
 			vector_push_back(obj->vn, new_vec3(x, y, z));
 			obj->isnorm = 1;
 		} else if(!strcmp(buf, "f")) {
-			int f[4], t[4], num, mat, four;
+			int f[4], t[4], num, four;
 			if(gets_file(&file, buf, sizeof(buf)) == NULL)
 				continue;
 			if(strichr(buf, ' ') == 4) {
@@ -354,9 +353,8 @@ int load_object(struct objfile *obj, const char *filename)
 					&num, &f[2], &num,
 					&f[3], &num);
 					t[0]=t[1]=t[2]=t[3]=0;
-					mat = curmat;
 					vector_push_back(obj->f,
-					new_face(four, num, mat, f, t));
+					new_face(four, num, curmat, f, t));
 				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
 					"%d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d",
@@ -364,19 +362,16 @@ int load_object(struct objfile *obj, const char *filename)
 					&f[1], &t[1], &num,
 					&f[2], &t[2], &num,
 					&f[3], &t[3], &num);
-					mat = curmat;
 					vector_push_back(obj->f,
-					new_face(four, num, mat, f, t));
+					new_face(four, num, curmat, f, t));
 				} else {
 					sscanf(buf,
 					"%d %d %d %d",
 					&f[0], &f[2], &f[3],
 					&f[4]);
 					t[0]=t[1]=t[2]=t[3]=0;
-					num=-1;
-					mat = curmat;
 					vector_push_back(obj->f,
-					new_face(four, num, mat, f, t));
+					new_face(four, -1, curmat, f, t));
 				}
 			} else {
 				four = 0;
@@ -386,9 +381,8 @@ int load_object(struct objfile *obj, const char *filename)
 					&num, &f[2], &num);
 					f[4] = 0;
 					t[0]=t[1]=t[2]=t[3]=0;
-					mat = curmat;
 					vector_push_back(obj->f,
-					new_face(four, num, mat, f, t));
+					new_face(four, num, curmat, f, t));
 				} else if(strstr(buf, "/") != NULL) {
 					sscanf(buf,
 					"%d/%d/%d %d/%d/%d %d/%d/%d",
@@ -397,19 +391,16 @@ int load_object(struct objfile *obj, const char *filename)
 					&f[2], &t[2], &num);
 					f[3] = 0;
 					t[3] = 0;
-					mat = curmat;
 					vector_push_back(obj->f,
-					new_face(four, num, mat, f, t));
+					new_face(four, num, curmat, f, t));
 				} else {
 					sscanf(buf,
 					"%d %d %d",
 					&f[0], &f[1], &f[2]);
 					t[0]=t[1]=t[2]=t[3]=0;
 					f[4] = 0;
-					num = -1;
-					mat = curmat;
 					vector_push_back(obj->f,
-					new_face(four, num, mat, f, t));
+					new_face(four, -1, curmat, f, t));
 				}
 			}
 		} else if(!strcmp(buf, "vt")) {
