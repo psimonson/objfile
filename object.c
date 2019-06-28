@@ -160,7 +160,8 @@ static int make_object(struct objfile *obj)
 		if(obj->f[i].four) {
 			glBegin(GL_QUADS);
 			if(obj->isnorm) {
-				glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
+				glNormal3f(obj->vn[obj->f[i].num-1].x,
+					obj->vn[obj->f[i].num-1].y,
 					obj->vn[obj->f[i].num-1].z);
 			}
 			if(obj->istex) {
@@ -195,7 +196,8 @@ static int make_object(struct objfile *obj)
 		} else {
 			glBegin(GL_TRIANGLES);
 			if(obj->isnorm) {
-				glNormal3f(obj->vn[obj->f[i].num-1].x, obj->vn[obj->f[i].num-1].y,
+				glNormal3f(obj->vn[obj->f[i].num-1].x,
+					obj->vn[obj->f[i].num-1].y,
 					obj->vn[obj->f[i].num-1].z);
 			}
 			if(obj->istex) {
@@ -254,7 +256,7 @@ static int load_material(struct objfile *obj, const char *filename)
 {
 	float alpha, ns, ni, dif[3], amb[3], spec[3];
 	int illum, tex;
-	char name[256];
+	char name[256], fname[256];
 	file_t file;
 	char buf[256];
 	int ismat;
@@ -264,12 +266,19 @@ static int load_material(struct objfile *obj, const char *filename)
 	if(get_errori_file(&file) != FILE_ERROR_OKAY)
 		return 1;
 	ismat = tex = 0;
+	strcpy(fname, "\0");
 	while(readf_file(&file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "newmtl")) {
 			if(ismat) {
-				vector_push_back(obj->mat,
-				new_material(name, alpha, ns, ni, dif, amb,
-				spec, illum, tex));
+				if(!strcmp(fname, "")) {
+					vector_push_back(obj->mat,
+					new_material(name, alpha, ns, ni, dif,
+					amb, spec, illum, -1));
+				} else {
+					vector_push_back(obj->mat,
+					new_material(name, alpha, ns, ni, dif,
+					amb, spec, illum, tex));
+				}
 			}
 			ismat = tex = 0;
 			readf_file(&file, "%s", name);
@@ -298,15 +307,20 @@ static int load_material(struct objfile *obj, const char *filename)
 			readf_file(&file, "%f", &illum);
 			ismat = 1;
 		} else if(!strcmp(buf, "map_Kd")) {
-			char tmpname[256];
-
-			readf_file(&file, "%s", tmpname);
-			tex = load_texture(tmpname);
+			readf_file(&file, "%s", fname);
+			tex = load_texture(fname);
 		}
 	}
 	if(ismat) {
-		vector_push_back(obj->mat,
-		new_material(name, alpha, ns, ni, dif, amb, spec, illum, tex));
+		if(!strcmp(fname, "")) {
+			vector_push_back(obj->mat,
+			new_material(name, alpha, ns, ni, dif, amb,
+			spec, illum, -1));
+		} else {
+			vector_push_back(obj->mat,
+			new_material(name, alpha, ns, ni, dif, amb,
+			spec, illum, tex));
+		}
 	}
 	if(vector_size(obj->mat) == 0)
 		obj->ismat = 0;
