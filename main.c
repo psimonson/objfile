@@ -6,13 +6,14 @@
 #include "object.h"
 #include "GL/freeglut.h"
 
-static struct objfile *obj,*obj2;
+static struct objfile *obj,*obj2,*obj3;
 
 void cleanup()
 {
-	extern struct objfile *obj,*obj2;
+	extern struct objfile *obj,*obj2,*obj3;
 	destroy_object(obj);
 	destroy_object(obj2);
+	destroy_object(obj3);
 }
 
 void change_size(int w, int h)
@@ -39,7 +40,7 @@ void change_size(int w, int h)
 
 void render_scene()
 {
-	extern struct objfile *obj,*obj2;
+	extern struct objfile *obj,*obj2,*obj3;
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -53,6 +54,8 @@ void render_scene()
 	draw_object(obj);
 	glTranslatef(10.0f, 0.0f, 10.0f);
 	draw_object(obj2);
+	glTranslatef(-5.0f, 0.0f, -20.0f);
+	draw_object(obj3);
 	glutSwapBuffers();
 }
 
@@ -71,7 +74,7 @@ int init_glut(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	extern struct objfile *obj,*obj2;
+	extern struct objfile *obj,*obj2,*obj3;
 
 	if(init_glut(argc, argv))
 		return 1;
@@ -88,8 +91,17 @@ int main(int argc, char **argv)
 		destroy_object(obj);
 		return 1;
 	}
+	obj3 = init_object();
+	if(!obj3) return 1;
+	if(load_object(obj3, "test3.obj") < 0) {
+		fprintf(stderr, "Error: Cannot load object...\n");
+		destroy_object(obj);
+		destroy_object(obj2);
+		return 1;
+	}
 /*	print_object(obj);*/
 /*	print_object(obj2);*/
+/*	print_object(obj3);*/
 	glutMainLoop();
 	cleanup();
 	return 0;
