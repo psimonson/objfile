@@ -26,7 +26,7 @@
 /**
  * @brief Count number of chars in string that occured.
  */
-int strichr(const char *s, int ch)
+static int strichr(const char *s, int ch)
 {
 	int i;
 	for(i=0; *s; s++)
@@ -149,7 +149,7 @@ static int make_object(struct objfile *obj)
 			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, amb);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
 			last = obj->f[i].mat;
-			if(obj->mat[obj->f[i].mat].texture == 0) {
+			if(!obj->mat[obj->f[i].mat].texture) {
 				glDisable(GL_TEXTURE_2D);
 			} else {
 				glEnable(GL_TEXTURE_2D);
@@ -164,28 +164,28 @@ static int make_object(struct objfile *obj)
 					obj->vn[obj->f[i].num-1].y,
 					obj->vn[obj->f[i].num-1].z);
 			}
-			if(obj->istex) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].tex.f1-1].u,
 					obj->t[obj->f[i].tex.f1-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
-			if(obj->istex) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].tex.f2-1].u,
 					obj->t[obj->f[i].tex.f2-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
-			if(obj->istex) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].tex.f3-1].u,
 					obj->t[obj->f[i].tex.f3-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f3-1].x,
 				obj->v[obj->f[i].face.f3-1].y,
 				obj->v[obj->f[i].face.f3-1].z);
-			if(obj->istex) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].tex.f4-1].u,
 					obj->t[obj->f[i].tex.f4-1].v);
 			}
@@ -200,21 +200,21 @@ static int make_object(struct objfile *obj)
 					obj->vn[obj->f[i].num-1].y,
 					obj->vn[obj->f[i].num-1].z);
 			}
-			if(obj->istex) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].tex.f1-1].u,
 					obj->t[obj->f[i].tex.f1-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f1-1].x,
 				obj->v[obj->f[i].face.f1-1].y,
 				obj->v[obj->f[i].face.f1-1].z);
-			if(obj->istex) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].tex.f2-1].u,
 					obj->t[obj->f[i].tex.f2-1].v);
 			}
 			glVertex3f(obj->v[obj->f[i].face.f2-1].x,
 				obj->v[obj->f[i].face.f2-1].y,
 				obj->v[obj->f[i].face.f2-1].z);
-			if(obj->istex) {
+			if(obj->istex && obj->mat[obj->f[i].mat].texture) {
 				glTexCoord2f(obj->t[obj->f[i].tex.f3-1].u,
 					obj->t[obj->f[i].tex.f3-1].v);
 			}
@@ -278,6 +278,7 @@ static int load_material(struct objfile *obj, const char *filename)
 					vector_push_back(obj->mat,
 					new_material(name, alpha, ns, ni, dif,
 					amb, spec, illum, tex));
+					strcpy(fname, "\0");
 				}
 			}
 			ismat = tex = 0;
@@ -309,6 +310,7 @@ static int load_material(struct objfile *obj, const char *filename)
 		} else if(!strcmp(buf, "map_Kd")) {
 			readf_file(&file, "%s", fname);
 			tex = load_texture(fname);
+			ismat = 1;
 		}
 	}
 	if(ismat) {
@@ -320,6 +322,7 @@ static int load_material(struct objfile *obj, const char *filename)
 			vector_push_back(obj->mat,
 			new_material(name, alpha, ns, ni, dif, amb,
 			spec, illum, tex));
+			strcpy(fname, "\0");
 		}
 	}
 	if(vector_size(obj->mat) == 0)
@@ -345,6 +348,8 @@ int load_object(struct objfile *obj, const char *filename)
 	}
 	curmat = 0;
 	while(readf_file(&file, "%s", buf) != EOF) {
+		char tmpname[256];
+
 		if(!strcmp(buf, "v")) {
 			float x, y, z;
 			readf_file(&file, "%f %f %f", &x, &y, &z);
@@ -423,7 +428,6 @@ int load_object(struct objfile *obj, const char *filename)
 			vector_push_back(obj->t, new_coord(u, 1-v));
 			obj->istex = 1;
 		} else if(!strcmp(buf, "usemtl")) {
-			char tmpname[256];
 			size_t i;
 			readf_file(&file, "%s", tmpname);
 			for(i=0; i<vector_size(obj->mat); i++) {
@@ -433,14 +437,15 @@ int load_object(struct objfile *obj, const char *filename)
 				}
 			}
 		} else if(!strcmp(buf, "mtllib")) {
-			char tmpname[256];
 			readf_file(&file, "%s", tmpname);
+			obj->ismat = 1;
 			if(load_material(obj, tmpname)) {
 				fprintf(stderr,
 				"Warning: Could not load mtllib: %s\n",
 				tmpname);
 			}
 		}
+		strcpy(tmpname, "");
 	}
 	close_file(&file);
 	obj->l = make_object(obj);

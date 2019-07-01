@@ -88,15 +88,14 @@ int main(int argc, char **argv)
 	if(!obj2) return 1;
 	if(load_object(obj2, "test2.obj") < 0) {
 		fprintf(stderr, "Error: Cannot load object...\n");
-		destroy_object(obj);
+		cleanup();
 		return 1;
 	}
 	obj3 = init_object();
 	if(!obj3) return 1;
 	if(load_object(obj3, "test3.obj") < 0) {
 		fprintf(stderr, "Error: Cannot load object...\n");
-		destroy_object(obj);
-		destroy_object(obj2);
+		cleanup();
 		return 1;
 	}
 /*	print_object(obj);*/
