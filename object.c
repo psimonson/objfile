@@ -72,7 +72,7 @@ static struct material new_material(const char *name, float alpha,
 	int illum, unsigned int tex)
 {
 	struct material m;
-	strncpy(m.name, name, strlen(name));
+	strncpy(m.name, name, strlen(name)+1);
 	m.alpha = alpha;
 	m.ns = ns;
 	m.ni = ni;
@@ -136,18 +136,20 @@ static int make_object(struct objfile *obj)
 	glNewList(unique_number, GL_COMPILE);
 	for(i=0; i < vector_size(obj->f); i++) {
 		if(last != obj->f[i].mat && obj->ismat) {
-			float dif[] = {obj->mat[obj->f[i].mat].dif[0],
+			const float dif[] = {obj->mat[obj->f[i].mat].dif[0],
 				obj->mat[obj->f[i].mat].dif[1],
 				obj->mat[obj->f[i].mat].dif[2], 1.0f};
-			float amb[] = {obj->mat[obj->f[i].mat].amb[0],
+			const float amb[] = {obj->mat[obj->f[i].mat].amb[0],
 				obj->mat[obj->f[i].mat].amb[1],
 				obj->mat[obj->f[i].mat].amb[2], 1.0f};
-			float spec[] = {obj->mat[obj->f[i].mat].spec[0],
+			const float spec[] = {obj->mat[obj->f[i].mat].spec[0],
 				obj->mat[obj->f[i].mat].spec[1],
 				obj->mat[obj->f[i].mat].spec[2], 1.0f};
+			const float shin = obj->mat[obj->f[i].mat].ns;
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, dif);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, amb);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
+			glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &shin);
 			last = obj->f[i].mat;
 			if(!obj->mat[obj->f[i].mat].texture) {
 				glDisable(GL_TEXTURE_2D);
@@ -282,6 +284,7 @@ static int load_material(struct objfile *obj, const char *filename)
 				}
 			}
 			ismat = tex = 0;
+			memset(name, 0, sizeof(name));
 			readf_file(&file, "%s", name);
 		} else if(!strcmp(buf, "Ns")) {
 			readf_file(&file, "%f", &ns);
@@ -429,6 +432,8 @@ int load_object(struct objfile *obj, const char *filename)
 			obj->istex = 1;
 		} else if(!strcmp(buf, "usemtl")) {
 			size_t i;
+
+			memset(tmpname, 0, sizeof(tmpname));
 			readf_file(&file, "%s", tmpname);
 			for(i=0; i<vector_size(obj->mat); i++) {
 				if(!strcmp(obj->mat[i].name, tmpname)) {
@@ -437,6 +442,7 @@ int load_object(struct objfile *obj, const char *filename)
 				}
 			}
 		} else if(!strcmp(buf, "mtllib")) {
+			memset(tmpname, 0, sizeof(tmpname));
 			readf_file(&file, "%s", tmpname);
 			obj->ismat = 1;
 			if(load_material(obj, tmpname)) {
@@ -472,11 +478,13 @@ void print_object(struct objfile *obj)
 			obj->v[i].y, obj->v[i].z);
 	}
 	printf("=====================================================\n");
-	for(i=0; i < vector_size(obj->vn); i++) {
-		printf("%f %f %f\n", obj->vn[i].x,
-			obj->vn[i].y, obj->vn[i].z);
+	if(obj->isnorm) {
+		for(i=0; i < vector_size(obj->vn); i++) {
+			printf("%f %f %f\n", obj->vn[i].x,
+				obj->vn[i].y, obj->vn[i].z);
+		}
+		printf("=====================================================\n");
 	}
-	printf("=====================================================\n");
 	for(i=0; i < vector_size(obj->f); i++) {
 		if(obj->f[i].four) {
 			if(obj->f[i].tex.f1 == 0 && obj->f[i].num) {
@@ -534,36 +542,40 @@ void print_object(struct objfile *obj)
 		}
 	}
 	printf("=====================================================\n");
-	for(i=0; i<vector_size(obj->mat); i++) {
-		printf("Name: %s\nAlpha: %f\nNs: %f\nNi: %f\n"
-			"Diffuse: %f %f %f\n"
-			"Ambient: %f %f %f\n"
-			"Specular: %f %f %f\n"
-			"Texture ID: %d\n",
-			obj->mat[i].name, obj->mat[i].alpha,
-			obj->mat[i].ns, obj->mat[i].ni,
-			obj->mat[i].dif[0], obj->mat[i].dif[1],
-			obj->mat[i].dif[2], obj->mat[i].amb[0],
-			obj->mat[i].amb[1], obj->mat[i].amb[2],
-			obj->mat[i].spec[0], obj->mat[i].spec[1],
-			obj->mat[i].spec[2], obj->mat[i].texture);
+	if(obj->ismat) {
+		for(i=0; i<vector_size(obj->mat); i++) {
+			printf("Name: %s\nAlpha: %f\nNs: %f\nNi: %f\n"
+				"Diffuse: %f %f %f\n"
+				"Ambient: %f %f %f\n"
+				"Specular: %f %f %f\n"
+				"Texture ID: %d\n",
+				obj->mat[i].name, obj->mat[i].alpha,
+				obj->mat[i].ns, obj->mat[i].ni,
+				obj->mat[i].dif[0], obj->mat[i].dif[1],
+				obj->mat[i].dif[2], obj->mat[i].amb[0],
+				obj->mat[i].amb[1], obj->mat[i].amb[2],
+				obj->mat[i].spec[0], obj->mat[i].spec[1],
+				obj->mat[i].spec[2], obj->mat[i].texture);
+		}
+		printf("=====================================================\n");
 	}
-	printf("=====================================================\n");
-	for(i=0; i<vector_size(obj->t); i++) {
-		printf("Texture UV Coords: %f %f\n",
-			obj->t[i].u, obj->t[i].v);
+	if(obj->istex) {
+		for(i=0; i<vector_size(obj->t); i++) {
+			printf("Texture UV Coords: %f %f\n",
+				obj->t[i].u, obj->t[i].v);
+		}
+		printf("=====================================================\n");
+		for(i=0; i<vector_size(obj->f); i++) {
+			printf("Face Number: %d\nTexture Material Indexes [1-4]:\n"
+				"%d %d %d %d\n", obj->f[i].num,
+				obj->f[i].tex.f1,
+				obj->f[i].tex.f2,
+				obj->f[i].tex.f3,
+				obj->f[i].tex.f4
+			);
+		}
+		printf("=====================================================\n");
 	}
-	printf("=====================================================\n");
-	for(i=0; i<vector_size(obj->f); i++) {
-		printf("Face Number: %lu\nTexture Material Indexes [1-4]:\n"
-			"%d %d %d %d\n", i,
-			obj->f[i].tex.f1,
-			obj->f[i].tex.f2,
-			obj->f[i].tex.f3,
-			obj->f[i].tex.f4
-		);
-	} 
-	printf("=====================================================\n");
 }
 /**
  * @brief Destroy given object structure.

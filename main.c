@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 	}
 /*	print_object(obj);*/
 /*	print_object(obj2);*/
-/*	print_object(obj3);*/
+	print_object(obj3);
 	glutMainLoop();
 	cleanup();
 	return 0;
