@@ -149,7 +149,7 @@ static int make_object(struct objfile *obj)
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, dif);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, amb);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
-			glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, &shin);
+			glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shin);
 			last = obj->f[i].mat;
 			if(!obj->mat[obj->f[i].mat].texture) {
 				glDisable(GL_TEXTURE_2D);
