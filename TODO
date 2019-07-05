@@ -7,7 +7,7 @@
  * Load materials for objects.
  * Finish loading textures for objects.
  * Fix bug with texture UV coordinates.
- - Fix bug with materials not loading properly.
+ * Fix bug with materials not loading properly.
 ===============================================================
 NOTE: An '*' character means that it's done
 and '-' character means, "needs to be done".
