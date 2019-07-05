@@ -145,11 +145,11 @@ static int make_object(struct objfile *obj)
 			const float spec[] = {obj->mat[obj->f[i].mat].spec[0],
 				obj->mat[obj->f[i].mat].spec[1],
 				obj->mat[obj->f[i].mat].spec[2], 1.0f};
-			const float shin = obj->mat[obj->f[i].mat].ns;
+			const float shine = obj->mat[obj->f[i].mat].ns;
 			glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, dif);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, amb);
 			glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, spec);
-			glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shin);
+			glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shine);
 			last = obj->f[i].mat;
 			if(!obj->mat[obj->f[i].mat].texture) {
 				glDisable(GL_TEXTURE_2D);
@@ -249,6 +249,8 @@ static unsigned int load_texture(const char *filename)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, bmp->info.width,
 		bmp->info.height, 0, GL_BGR, GL_UNSIGNED_BYTE, bmp->data);
 	destroy_bitmap(bmp);
+	if(glGetError() != GL_NO_ERROR)
+		return 0;
 	return tex_id;
 }
 /**
