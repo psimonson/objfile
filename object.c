@@ -261,17 +261,16 @@ static int load_material(struct objfile *obj, const char *filename)
 	float alpha, ns, ni, dif[3], amb[3], spec[3];
 	int illum, tex;
 	char name[256], fname[256];
-	file_t file;
+	file_t *file;
 	char buf[256];
 	int ismat;
 
-	init_file(&file);
-	open_file(&file, filename, "rt");
-	if(get_errori_file(&file) != FILE_ERROR_OKAY)
+	file = open_file(filename, "rt");
+	if(get_error_file() != FILE_ERROR_OKAY)
 		return 1;
 	ismat = tex = 0;
 	strcpy(fname, "\0");
-	while(readf_file(&file, "%s", buf) != EOF) {
+	while(readf_file(file, "%s", buf) != EOF) {
 		if(!strcmp(buf, "newmtl")) {
 			if(ismat) {
 				if(!strcmp(fname, "")) {
@@ -287,33 +286,33 @@ static int load_material(struct objfile *obj, const char *filename)
 			}
 			ismat = tex = 0;
 			memset(name, 0, sizeof(name));
-			readf_file(&file, "%s", name);
+			readf_file(file, "%s", name);
 		} else if(!strcmp(buf, "Ns")) {
-			readf_file(&file, "%f", &ns);
+			readf_file(file, "%f", &ns);
 			ismat = 1;
 		} else if(!strcmp(buf, "Ka")) {
-			readf_file(&file, "%f %f %f",
+			readf_file(file, "%f %f %f",
 				&amb[0], &amb[1], &amb[2]);
 			ismat = 1;
 		} else if(!strcmp(buf, "Kd")) {
-			readf_file(&file, "%f %f %f",
+			readf_file(file, "%f %f %f",
 				&dif[0], &dif[1], &dif[2]);
 			ismat = 1;
 		} else if(!strcmp(buf, "Ks")) {
-			readf_file(&file, "%f %f %f",
+			readf_file(file, "%f %f %f",
 				&spec[0], &spec[1], &spec[2]);
 			ismat = 1;
 		} else if(!strcmp(buf, "Ni")) {
-			readf_file(&file, "%f", &ni);
+			readf_file(file, "%f", &ni);
 			ismat = 1;
 		} else if(!strcmp(buf, "d")) {
-			readf_file(&file, "%f", &alpha);
+			readf_file(file, "%f", &alpha);
 			ismat = 1;
 		} else if(!strcmp(buf, "illum")) {
-			readf_file(&file, "%f", &illum);
+			readf_file(file, "%f", &illum);
 			ismat = 1;
 		} else if(!strcmp(buf, "map_Kd")) {
-			readf_file(&file, "%s", fname);
+			readf_file(file, "%s", fname);
 			tex = load_texture(fname);
 			ismat = 1;
 		}
@@ -341,32 +340,31 @@ static int load_material(struct objfile *obj, const char *filename)
  */
 int load_object(struct objfile *obj, const char *filename)
 {
-	file_t file;
+	file_t *file;
 	char buf[256];
 	int curmat;
 
-	init_file(&file);
-	open_file(&file, filename, "rt");
-	if(get_errori_file(&file) != FILE_ERROR_OKAY) {
-		fprintf(stderr, "Error: %s\n", get_error_file(&file));
+	file = open_file(filename, "rt");
+	if(get_error_file() != FILE_ERROR_OKAY) {
+		fprintf(stderr, "Error: %s\n", strerror_file(get_error_file()));
 		return 1;
 	}
 	curmat = 0;
-	while(readf_file(&file, "%s", buf) != EOF) {
+	while(readf_file(file, "%s", buf) != EOF) {
 		char tmpname[256];
 
 		if(!strcmp(buf, "v")) {
 			float x, y, z;
-			readf_file(&file, "%f %f %f", &x, &y, &z);
+			readf_file(file, "%f %f %f", &x, &y, &z);
 			vector_push_back(obj->v, new_vec3(x, y, z));
 		} else if(!strcmp(buf, "vn")) {
 			float x, y, z;
-			readf_file(&file, "%f %f %f", &x, &y, &z);
+			readf_file(file, "%f %f %f", &x, &y, &z);
 			vector_push_back(obj->vn, new_vec3(x, y, z));
 			obj->isnorm = 1;
 		} else if(!strcmp(buf, "f")) {
 			int f[4], t[4], num, four;
-			if(gets_file(&file, buf, sizeof(buf)) == NULL)
+			if(gets_file(file, buf, sizeof(buf)) == NULL)
 				continue;
 			if(strichr(buf, ' ') == 4) {
 				four = 1;
@@ -429,14 +427,14 @@ int load_object(struct objfile *obj, const char *filename)
 			}
 		} else if(!strcmp(buf, "vt")) {
 			float u, v;
-			readf_file(&file, "%f %f", &u, &v);
+			readf_file(file, "%f %f", &u, &v);
 			vector_push_back(obj->t, new_coord(u, 1-v));
 			obj->istex = 1;
 		} else if(!strcmp(buf, "usemtl")) {
 			size_t i;
 
 			memset(tmpname, 0, sizeof(tmpname));
-			readf_file(&file, "%s", tmpname);
+			readf_file(file, "%s", tmpname);
 			for(i=0; i<vector_size(obj->mat); i++) {
 				if(!strcmp(obj->mat[i].name, tmpname)) {
 					curmat = i;
@@ -445,7 +443,7 @@ int load_object(struct objfile *obj, const char *filename)
 			}
 		} else if(!strcmp(buf, "mtllib")) {
 			memset(tmpname, 0, sizeof(tmpname));
-			readf_file(&file, "%s", tmpname);
+			readf_file(file, "%s", tmpname);
 			obj->ismat = 1;
 			if(load_material(obj, tmpname)) {
 				fprintf(stderr,
@@ -455,7 +453,7 @@ int load_object(struct objfile *obj, const char *filename)
 		}
 		strcpy(tmpname, "");
 	}
-	close_file(&file);
+	close_file(file);
 	obj->l = make_object(obj);
 	return 0;
 }
