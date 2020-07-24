@@ -1,4 +1,4 @@
-CFLAGS+=-std=c89 -Wall -Wextra -Werror -g $(shell pkg-config --cflags prs)
+CFLAGS+=-std=c11 -Wall -Wextra -Werror -g $(shell pkg-config --cflags prs)
 LDFLAGS+=$(shell pkg-config --libs prs) -lGL -lGLU -lglut
 
 SRCDIR=$(shell pwd)
@@ -24,6 +24,7 @@ clean:
 	rm -f *~ *.log $(OBJECT) $(TARGET)
 
 distclean: clean
+	rm -f *.bak
 
 dist:
 	@echo Compressing $(TARNAME)...
