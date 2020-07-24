@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
+#include <errno.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
@@ -23,8 +25,7 @@
 
 /* --------------------------- Helper Functions -------------------------- */
 
-/**
- * @brief Count number of chars in string that occured.
+/* Count number of chars in string that occured.
  */
 static int strichr(const char *s, int ch)
 {
@@ -34,8 +35,7 @@ static int strichr(const char *s, int ch)
 			i++;
 	return i;
 }
-/**
- * @brief Create a new vector 3.
+/* Create a new vector 3.
  */
 static struct vec3 new_vec3(float x, float y, float z)
 {
@@ -45,8 +45,7 @@ static struct vec3 new_vec3(float x, float y, float z)
 	v.z = z;
 	return v;
 }
-/**
- * @brief Creates a new face structure and fills it with data.
+/* Creates a new face structure and fills it with data.
  */
 static struct face new_face(int four, int num, int mat, int f[4], int t[4])
 {
@@ -64,8 +63,7 @@ static struct face new_face(int four, int num, int mat, int f[4], int t[4])
 	face.tex.f4 = t[3];
 	return face;
 }
-/**
- * @brief Creates a new material structure and fills it with data.
+/* Creates a new material structure and fills it with data.
  */
 static struct material new_material(const char *name, float alpha,
 	float ns, float ni, float dif[], float amb[], float spec[],
@@ -89,8 +87,7 @@ static struct material new_material(const char *name, float alpha,
 	m.texture = (tex > 0 ? tex : 0);
 	return m;
 }
-/**
- * @brief Create a new uv coordinate.
+/* Create a new uv coordinate.
  */
 static struct texcoord new_coord(float u, float v)
 {
@@ -99,11 +96,41 @@ static struct texcoord new_coord(float u, float v)
 	t.v = v;
 	return t;
 }
+/* Convert anim name to object name.
+ */
+static char *get_name(const char *dir_name, const char *anim_name)
+{
+	static char name[512];
+	struct dirent *p;
+	static DIR *dir = NULL;
+
+	// Start processing directory
+	if(dir == NULL) {
+		errno = 0;
+		if((dir = opendir((dir_name != NULL ? dir_name : "."))) == NULL) {
+			fprintf(stderr, "Error: %s\n", strerror(errno));
+			return NULL;
+		}
+	}
+
+	// Process directory
+	errno = 0;
+	if((p = readdir(dir)) != NULL) {
+		if((strcmp(p->d_name, ".") && strcmp(p->d_name, "..")) != 0 &&
+				(strstr(p->d_name, ".obj") && strstr(p->d_name, anim_name))) {
+			memset(name, 0, sizeof(name));
+			strncpy(name, p->d_name, strlen(p->d_name));
+		}
+	} else {
+		closedir(dir);
+		return NULL;
+	}
+	return name;
+}
 
 /* --------------------------- Object Functions -------------------------- */
 
-/**
- * @brief Create object and set to default values.
+/* Create object and set to default values.
  */
 struct objfile *init_object(void)
 {
@@ -121,8 +148,7 @@ struct objfile *init_object(void)
 	obj->f = NULL;
 	return obj;
 }
-/**
- * @brief Generate a GL list for drawing.
+/* Generate a GL list for drawing.
  */
 static int make_object(struct objfile *obj)
 {
@@ -231,8 +257,7 @@ static int make_object(struct objfile *obj)
 		return unique_number;
 	return -1;
 }
-/**
- * @brief Load a texture from a filename.
+/* Load a texture from a filename.
  */
 static unsigned int load_texture(const char *filename)
 {
@@ -253,8 +278,7 @@ static unsigned int load_texture(const char *filename)
 		return 0;
 	return tex_id;
 }
-/**
- * @brief Load material library file.
+/* Load material library file.
  */
 static int load_material(struct objfile *obj, const char *filename)
 {
@@ -335,8 +359,7 @@ static int load_material(struct objfile *obj, const char *filename)
 		obj->ismat = 1;
 	return 0;
 }
-/**
- * @brief Create object from file.
+/* Create object from file.
  */
 int load_object(struct objfile *obj, const char *filename)
 {
@@ -457,15 +480,13 @@ int load_object(struct objfile *obj, const char *filename)
 	obj->l = make_object(obj);
 	return 0;
 }
-/**
- * @brief Draw object to screen.
+/* Draw object to screen.
  */
 void draw_object(struct objfile *obj)
 {
 	glCallList(obj->l);
 }
-/**
- * @brief Print object data.
+/* Print object data.
  */
 void print_object(struct objfile *obj)
 {
@@ -577,8 +598,27 @@ void print_object(struct objfile *obj)
 		printf("=====================================================\n");
 	}
 }
-/**
- * @brief Destroy given object structure.
+/* Load an animation from it's name.
+ */
+struct objfile **load_anim(const char *dir, const char *anim_name)
+{
+	struct objfile **anim = NULL;
+	char *name = NULL;
+	int i = 0;
+
+	printf("Loading animation: %s\n", anim_name);
+	while((name = get_name(dir, anim_name)) != NULL) {
+		if(name != NULL) {
+			struct objfile *frame = init_object();
+			if(frame == NULL) continue;
+			printf("Frame %d: %s\n", i, name);
+			vector_push_back(anim, frame);
+			++i;
+		}
+	}
+	return anim;
+}
+/* Destroy given object structure.
  */
 void destroy_object(struct objfile *obj)
 {

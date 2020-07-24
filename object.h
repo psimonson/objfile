@@ -13,10 +13,6 @@
 
 #include "export.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct vec3 {
 	float x;
 	float y;
@@ -57,11 +53,16 @@ struct objfile {
 	char ismat;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 PRS_EXPORT struct objfile *init_object(void);
 PRS_EXPORT int load_object(struct objfile *obj, const char*);
 PRS_EXPORT void destroy_object(struct objfile*);
 PRS_EXPORT void draw_object(struct objfile*);
 PRS_EXPORT void print_object(struct objfile*);
+PRS_EXPORT struct objfile **load_anim(const char *dir, const char *anim_name);
 
 #ifdef __cplusplus
 }

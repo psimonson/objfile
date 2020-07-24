@@ -4,7 +4,6 @@
 
 #include "unused.h"
 #include "object.h"
-#include "anim.h"
 #include "GL/freeglut.h"
 
 static struct objfile *obj,*obj2,*obj3;
