@@ -20,6 +20,7 @@
 #define FPS 60 // For regulating FPS
 
 static struct objfile *obj, *obj2, *obj3, **anim1;
+static int anim1_frame;
 
 /* Clean up all memory resources.
  */
@@ -59,7 +60,9 @@ void change_size(int w, int h)
 void render_scene()
 {
 	extern struct objfile *obj, *obj2, *obj3, **anim1;
-	static int anim1_frame = 0;
+
+	if(anim1_frame >= (int)vector_size(anim1))
+		anim1_frame = 0;
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -77,20 +80,18 @@ void render_scene()
 	draw_object(obj3);
 	glTranslatef(-3.0f, 0.0f, 0.0f);
 
-	/* draw animation 1 */
+	/* draw anim1 */
 	draw_anim(anim1, anim1_frame);
-	++anim1_frame;
-	if(anim1_frame >= (int)vector_size(anim1))
-		anim1_frame = 0;
 
 	glutSwapBuffers();
 }
-/* Regulate FPS for the window.
+/* Timer function for animation.
  */
-void timer(int UNUSED(ms))
+void timer(int UNUSED(timer_id))
 {
+	anim1_frame++;
+	glutTimerFunc(100, timer, 0);
 	glutPostRedisplay();
-	glutTimerFunc(1000/FPS, timer, 0);
 }
 /* Initialize freeglut and return 0 on success.
  */
@@ -101,7 +102,7 @@ int init_glut(int argc, char **argv)
 	glutInitWindowSize(800, 600);
 	glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
 	if(!glutCreateWindow("OBJFILE v0.01")) return 1;
-	glutTimerFunc(1000/FPS, timer, 0);
+	glutTimerFunc(100, timer, 0);
 	glutDisplayFunc(render_scene);
 	glutIdleFunc(render_scene);
 	glutReshapeFunc(change_size);
