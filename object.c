@@ -124,8 +124,12 @@ static char **get_names(const char *dir_name, const char *anim_name)
 			if(name != NULL) {
 				int total_len = len+len2+1;
 				strncpy(name, (dir_name != NULL ? dir_name : "./"), total_len);
-				strncat(name, "/", total_len);
-				strncat(name+len+1, p->d_name, total_len);
+				if(dir_name != NULL) {
+					strncat(name, "/", total_len);
+					strncat(name+len+1, p->d_name, total_len);
+				} else {
+					strncat(name+len, p->d_name, total_len);
+				}
 				name[total_len] = 0;
 				vector_push_back(names, name);
 			}
