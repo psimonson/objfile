@@ -473,13 +473,23 @@ int load_object(struct objfile *obj, const char *filename)
 				}
 			}
 		} else if(!strcmp(buf, "mtllib")) {
+			char *dir = strrchr(filename, '/');
 			memset(tmpname, 0, sizeof(tmpname));
 			readf_file(file, "%s", tmpname);
 			obj->ismat = 1;
-			if(load_material(obj, tmpname)) {
-				fprintf(stderr,
-				"Warning: Could not load mtllib: %s\n",
-				tmpname);
+			if(dir != NULL) {
+				char path[512];
+				memset(path, 0, sizeof(path));
+				strncpy(path, filename, dir-filename);
+				strncat(path, "/", 2);
+				strncat(path, tmpname, strlen(tmpname));
+				if(load_material(obj, path)) {
+					fprintf(stderr, "Warning: Could not load material: %s\n", path);
+				}
+			} else {
+				if(load_material(obj, tmpname)) {
+					fprintf(stderr, "Warning: Could not load mtllib: %s\n", tmpname);
+				}
 			}
 		}
 		strcpy(tmpname, "");
