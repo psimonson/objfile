@@ -17,8 +17,12 @@
 
 #include "GL/freeglut.h"
 
+#define FPS 60 // For regulating FPS
+
 static struct objfile *obj, *obj2, *obj3, **anim1;
 
+/* Clean up all memory resources.
+ */
 void cleanup()
 {
 	extern struct objfile *obj, *obj2, *obj3, **anim1;
@@ -27,7 +31,8 @@ void cleanup()
 	destroy_object(obj3);
 	destroy_anim(anim1);
 }
-
+/* What to do when the window's size changes.
+ */
 void change_size(int w, int h)
 {
 	const float col[] = {0.7,0.7,0.7,1.0};
@@ -49,7 +54,8 @@ void change_size(int w, int h)
 	glEnable(GL_LIGHT0);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, col);
 }
-
+/* Render the scene.
+ */
 void render_scene()
 {
 	extern struct objfile *obj, *obj2, *obj3, **anim1;
@@ -73,7 +79,15 @@ void render_scene()
 		draw_object(anim1[i]);
 	glutSwapBuffers();
 }
-
+/* Regulate FPS for the window.
+ */
+void timer(int UNUSED(ms))
+{
+	glutPostRedisplay();
+	glutTimerFunc(1000/FPS, timer, 0);
+}
+/* Initialize freeglut and return 0 on success.
+ */
 int init_glut(int argc, char **argv)
 {
 	glutInit(&argc, argv);
@@ -81,12 +95,14 @@ int init_glut(int argc, char **argv)
 	glutInitWindowSize(800, 600);
 	glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE|GLUT_DEPTH);
 	if(!glutCreateWindow("OBJFILE v0.01")) return 1;
+	glutTimerFunc(1000/FPS, timer, 0);
 	glutDisplayFunc(render_scene);
 	glutIdleFunc(render_scene);
 	glutReshapeFunc(change_size);
 	return 0;
 }
-
+/* Entry point for test program.
+ */
 int main(int argc, char **argv)
 {
 	extern struct objfile *obj, *obj2, *obj3, **anim1;
@@ -113,10 +129,15 @@ int main(int argc, char **argv)
 		cleanup();
 		return 1;
 	}
-/*	print_object(obj);*/
-/*	print_object(obj2);*/
-	print_object(obj3);
+//	print_object(obj);
+//	print_object(obj2);
+//	print_object(obj3);
 	anim1 = load_anim(NULL, "test");
+	if(anim1 == NULL) {
+		fprintf(stderr, "Error: Cannot load anim1...\n");
+		cleanup();
+		return 1;
+	}
 	glutMainLoop();
 	cleanup();
 	return 0;
