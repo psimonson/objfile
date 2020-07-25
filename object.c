@@ -631,6 +631,13 @@ struct objfile **load_anim(const char *dir, const char *anim_name)
 	}
 	return anim;
 }
+/* Render an animation frame.
+ */
+void draw_anim(struct objfile **anim, int frame)
+{
+	if(frame < 0 || frame > (int)vector_size(anim)) return;
+	draw_object(anim[frame]);
+}
 /* Destroy given animation.
  */
 void destroy_anim(struct objfile **anim)

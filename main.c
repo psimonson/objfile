@@ -59,6 +59,7 @@ void change_size(int w, int h)
 void render_scene()
 {
 	extern struct objfile *obj, *obj2, *obj3, **anim1;
+	static int anim1_frame = 0;
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -75,8 +76,13 @@ void render_scene()
 	glTranslatef(-5.0f, 0.0f, -20.0f);
 	draw_object(obj3);
 	glTranslatef(-3.0f, 0.0f, 0.0f);
-	for(size_t i = 0; i < vector_size(anim1); i++)
-		draw_object(anim1[i]);
+
+	/* draw animation 1 */
+	draw_anim(anim1, anim1_frame);
+	++anim1_frame;
+	if(anim1_frame >= (int)vector_size(anim1))
+		anim1_frame = 0;
+
 	glutSwapBuffers();
 }
 /* Regulate FPS for the window.
