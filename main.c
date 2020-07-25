@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 //	print_object(obj);
 //	print_object(obj2);
 //	print_object(obj3);
-	anim1 = load_anim(NULL, "test");
+	anim1 = load_anim("./anim", "cube_anim1");
 	if(anim1 == NULL) {
 		fprintf(stderr, "Error: Cannot load anim1...\n");
 		cleanup();

@@ -294,16 +294,17 @@ static unsigned int load_texture(const char *filename)
  */
 static int load_material(struct objfile *obj, const char *filename)
 {
-	float alpha, ns, ni, dif[3], amb[3], spec[3];
-	int illum, tex;
+	float alpha, ns, ni, illum, dif[3], amb[3], spec[3];
+	int ismat, tex, err;
 	char name[256], fname[256];
 	file_t *file;
 	char buf[256];
-	int ismat;
 
 	file = open_file(filename, "rt");
-	if(get_error_file() != FILE_ERROR_OKAY)
+	if((err = get_error_file()) != FILE_ERROR_OKAY) {
+		fprintf(stderr, "Error: %s\n", strerror_file(err));
 		return 1;
+	}
 	ismat = tex = 0;
 	strcpy(fname, "\0");
 	while(readf_file(file, "%s", buf) != EOF) {
@@ -375,13 +376,13 @@ static int load_material(struct objfile *obj, const char *filename)
  */
 int load_object(struct objfile *obj, const char *filename)
 {
+	int curmat, err;
 	file_t *file;
 	char buf[256];
-	int curmat;
 
 	file = open_file(filename, "rt");
-	if(get_error_file() != FILE_ERROR_OKAY) {
-		fprintf(stderr, "Error: %s\n", strerror_file(get_error_file()));
+	if((err = get_error_file()) != FILE_ERROR_OKAY) {
+		fprintf(stderr, "Error: %s\n", strerror_file(err));
 		return 1;
 	}
 	curmat = 0;
