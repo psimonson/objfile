@@ -25,18 +25,6 @@
 
 /* --------------------------- Helper Functions -------------------------- */
 
-/* Duplicate a string passed to the function.
- */
-static char *strdup(const char *s)
-{
-	int len = strlen(s);
-	char *p = malloc(sizeof(char)*(len+1));
-	if(p != NULL) {
-		memcpy(p, s, len);
-		p[len] = 0;
-	}
-	return p;
-}
 /* Count number of chars in string that occured.
  */
 static int strichr(const char *s, int ch)
@@ -130,8 +118,15 @@ static char **get_names(const char *dir_name, const char *anim_name)
 	while((p = readdir(dir)) != NULL) {
 		if((strcmp(p->d_name, ".") && strcmp(p->d_name, "..")) != 0 &&
 				(strstr(p->d_name, ".obj") && strstr(p->d_name, anim_name))) {
-			char *name = strdup(p->d_name);
+			int len = (dir_name ? strlen(dir_name) : 2);
+			int len2 = strlen(p->d_name);
+			char *name = malloc(sizeof(char)*(len+len2+1));
 			if(name != NULL) {
+				int total_len = len+len2+1;
+				strncpy(name, (dir_name != NULL ? dir_name : "./"), total_len);
+				strncat(name, "/", total_len);
+				strncat(name+len+1, p->d_name, total_len);
+				name[total_len] = 0;
 				vector_push_back(names, name);
 			}
 		}
