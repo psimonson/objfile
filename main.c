@@ -1,19 +1,31 @@
+/*
+ * main.c - Simple test program for testing objfile Wavefront object loader.
+ *
+ * Author: Philip R. Simonson
+ * Date  : 06/19/2019
+ *
+ *****************************************************************************
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "unused.h"
 #include "object.h"
+#include "vector.h"
+
 #include "GL/freeglut.h"
 
-static struct objfile *obj,*obj2,*obj3;
+static struct objfile *obj, *obj2, *obj3, **anim1;
 
 void cleanup()
 {
-	extern struct objfile *obj,*obj2,*obj3;
+	extern struct objfile *obj, *obj2, *obj3, **anim1;
 	destroy_object(obj);
 	destroy_object(obj2);
 	destroy_object(obj3);
+	destroy_anim(anim1);
 }
 
 void change_size(int w, int h)
@@ -40,7 +52,7 @@ void change_size(int w, int h)
 
 void render_scene()
 {
-	extern struct objfile *obj,*obj2,*obj3;
+	extern struct objfile *obj, *obj2, *obj3, **anim1;
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -56,6 +68,9 @@ void render_scene()
 	draw_object(obj2);
 	glTranslatef(-5.0f, 0.0f, -20.0f);
 	draw_object(obj3);
+	glTranslatef(-3.0f, 0.0f, 0.0f);
+	for(size_t i = 0; i < vector_size(anim1); i++)
+		draw_object(anim1[i]);
 	glutSwapBuffers();
 }
 
@@ -74,7 +89,7 @@ int init_glut(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	extern struct objfile *obj,*obj2,*obj3;
+	extern struct objfile *obj, *obj2, *obj3, **anim1;
 
 	if(init_glut(argc, argv))
 		return 1;
@@ -101,7 +116,7 @@ int main(int argc, char **argv)
 /*	print_object(obj);*/
 /*	print_object(obj2);*/
 	print_object(obj3);
-	load_anim(NULL, "test");
+	anim1 = load_anim(NULL, "test");
 	glutMainLoop();
 	cleanup();
 	return 0;

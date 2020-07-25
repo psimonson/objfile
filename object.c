@@ -25,6 +25,18 @@
 
 /* --------------------------- Helper Functions -------------------------- */
 
+/* Duplicate a string passed to the function.
+ */
+static char *strdup(const char *s)
+{
+	int len = strlen(s);
+	char *p = malloc(sizeof(char)*(len+1));
+	if(p != NULL) {
+		memcpy(p, s, len);
+		p[len] = 0;
+	}
+	return p;
+}
 /* Count number of chars in string that occured.
  */
 static int strichr(const char *s, int ch)
@@ -98,10 +110,10 @@ static struct texcoord new_coord(float u, float v)
 }
 /* Convert anim name to object name.
  */
-static char *get_name(const char *dir_name, const char *anim_name)
+static char **get_names(const char *dir_name, const char *anim_name)
 {
-	static char name[512];
-	struct dirent *p;
+	char **names = NULL;
+	struct dirent *p = NULL;
 	static DIR *dir = NULL;
 
 	// Start processing directory
@@ -115,17 +127,17 @@ static char *get_name(const char *dir_name, const char *anim_name)
 
 	// Process directory
 	errno = 0;
-	if((p = readdir(dir)) != NULL) {
+	while((p = readdir(dir)) != NULL) {
 		if((strcmp(p->d_name, ".") && strcmp(p->d_name, "..")) != 0 &&
 				(strstr(p->d_name, ".obj") && strstr(p->d_name, anim_name))) {
-			memset(name, 0, sizeof(name));
-			strncpy(name, p->d_name, strlen(p->d_name));
+			char *name = strdup(p->d_name);
+			if(name != NULL) {
+				vector_push_back(names, name);
+			}
 		}
-	} else {
-		closedir(dir);
-		return NULL;
 	}
-	return name;
+	closedir(dir);
+	return names;
 }
 
 /* --------------------------- Object Functions -------------------------- */
@@ -603,20 +615,31 @@ void print_object(struct objfile *obj)
 struct objfile **load_anim(const char *dir, const char *anim_name)
 {
 	struct objfile **anim = NULL;
-	char *name = NULL;
-	int i = 0;
+	char **names = NULL;
 
 	printf("Loading animation: %s\n", anim_name);
-	while((name = get_name(dir, anim_name)) != NULL) {
-		if(name != NULL) {
+	if((names = get_names(dir, anim_name)) != NULL) {
+		for(size_t i = 0; i < vector_size(names); i++) {
 			struct objfile *frame = init_object();
-			if(frame == NULL) continue;
-			printf("Frame %d: %s\n", i, name);
-			vector_push_back(anim, frame);
-			++i;
+			if(frame != NULL) {
+				printf("Frame %lu: %s\n", i, names[i]);
+				if(load_object(frame, names[i]) < 0)
+					continue;
+				vector_push_back(anim, frame);
+			}
 		}
 	}
 	return anim;
+}
+/* Destroy given animation.
+ */
+void destroy_anim(struct objfile **anim)
+{
+	size_t i;
+
+	for(i = 0; i < vector_size(anim); i++)
+		destroy_object(anim[i]);
+	vector_free(anim);
 }
 /* Destroy given object structure.
  */

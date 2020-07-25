@@ -63,6 +63,7 @@ PRS_EXPORT void destroy_object(struct objfile*);
 PRS_EXPORT void draw_object(struct objfile*);
 PRS_EXPORT void print_object(struct objfile*);
 PRS_EXPORT struct objfile **load_anim(const char *dir, const char *anim_name);
+PRS_EXPORT void destroy_anim(struct objfile **anim);
 
 #ifdef __cplusplus
 }
