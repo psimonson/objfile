@@ -25,6 +25,20 @@
 
 /* --------------------------- Helper Functions -------------------------- */
 
+/* Sort animation vector pointers.
+ */
+static void vsort(char *arr[], int size)
+{
+	int i, j;
+
+	for(i = 0; i < size; i++)
+		for(j = 0; j < size; j++)
+			if(strcmp(arr[i], arr[j]) < 0) {
+				char *tmp = arr[i];
+				arr[i] = arr[j];
+				arr[j] = tmp;
+			}
+}
 /* Count number of chars in string that occured.
  */
 static int strichr(const char *s, int ch)
@@ -629,6 +643,7 @@ struct objfile **load_anim(const char *dir, const char *anim_name)
 
 	printf("Loading animation: %s\n", anim_name);
 	if((names = get_names(dir, anim_name)) != NULL) {
+		vsort(names, vector_size(names));
 		for(size_t i = 0; i < vector_size(names); i++) {
 			struct objfile *frame = init_object();
 			if(frame != NULL) {
