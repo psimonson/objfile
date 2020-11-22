@@ -124,15 +124,13 @@ static char **get_names(const char *dir_name, const char *anim_name)
 {
 	char **names = NULL;
 	struct dirent *p = NULL;
-	static DIR *dir = NULL;
+	DIR *dir = NULL;
 
 	// Start processing directory
-	if(dir == NULL) {
-		errno = 0;
-		if((dir = opendir((dir_name != NULL ? dir_name : "."))) == NULL) {
-			fprintf(stderr, "Error: %s\n", strerror(errno));
-			return NULL;
-		}
+	errno = 0;
+	if((dir = opendir((dir_name != NULL ? dir_name : "."))) == NULL) {
+		fprintf(stderr, "Error: %s\n", strerror(errno));
+		return NULL;
 	}
 
 	// Process directory

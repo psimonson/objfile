@@ -19,18 +19,18 @@
 
 #define FPS 60 // For regulating FPS
 
-static struct objfile *obj, *obj2, *obj3, **anim1;
+static struct objfile *obj, *obj2, *obj3, **anim1, **anim2;
 static int anim_frame;
 
 /* Clean up all memory resources.
  */
 void cleanup()
 {
-	extern struct objfile *obj, *obj2, *obj3, **anim1;
 	destroy_object(obj);
 	destroy_object(obj2);
 	destroy_object(obj3);
 	destroy_anim(anim1);
+	destroy_anim(anim2);
 }
 /* What to do when the window's size changes.
  */
@@ -59,8 +59,6 @@ void change_size(int w, int h)
  */
 void render_scene()
 {
-	extern struct objfile *obj, *obj2, *obj3, **anim1;
-
 	if(anim_frame >= (int)vector_size(anim1))
 		anim_frame = 0;
 
@@ -82,6 +80,10 @@ void render_scene()
 	/* draw anim1 */
 	glTranslatef(-3.0f, 0.0f, 0.0f);
 	draw_anim(anim1, anim_frame);
+
+	/* draw anim2 */
+	glTranslatef(3.0f, 0.0f, 0.0f);
+	draw_anim(anim2, anim_frame);
 
 	glutSwapBuffers();
 }
@@ -142,6 +144,12 @@ int main(int argc, char **argv)
 	anim1 = load_anim("./anim", "cube_anim1", SORTASC);
 	if(anim1 == NULL) {
 		fprintf(stderr, "Error: Cannot load anim1...\n");
+		cleanup();
+		return 1;
+	}
+	anim2 = load_anim("./anim", "cube_anim1", SORTDEC);
+	if(anim2 == NULL) {
+		fprintf(stderr, "Error: Cannot load anim2...\n");
 		cleanup();
 		return 1;
 	}
