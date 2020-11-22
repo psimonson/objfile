@@ -27,16 +27,24 @@
 
 /* Sort animation vector pointers.
  */
-static void vsort(char *arr[], int size)
+static void vsort(char *arr[], int size, int mode)
 {
 	int i, j;
 
 	for(i = 0; i < size; i++)
 		for(j = 0; j < size; j++)
-			if(strcmp(arr[i], arr[j]) < 0) {
-				char *tmp = arr[i];
-				arr[i] = arr[j];
-				arr[j] = tmp;
+			if(mode) {
+				if(strcmp(arr[i], arr[j]) > 0) {
+					char *tmp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = tmp;
+				}
+			} else {
+				if(strcmp(arr[i], arr[j]) < 0) {
+					char *tmp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = tmp;
+				}
 			}
 }
 /* Count number of chars in string that occured.
@@ -636,23 +644,28 @@ void print_object(struct objfile *obj)
 }
 /* Load an animation from it's name.
  */
-struct objfile **load_anim(const char *dir, const char *anim_name)
+struct objfile **load_anim(const char *dir, const char *anim_name, int mode)
 {
 	struct objfile **anim = NULL;
 	char **names = NULL;
 
 	printf("Loading animation: %s\n", anim_name);
 	if((names = get_names(dir, anim_name)) != NULL) {
-		vsort(names, vector_size(names));
+		vsort(names, vector_size(names), mode);
 		for(size_t i = 0; i < vector_size(names); i++) {
 			struct objfile *frame = init_object();
 			if(frame != NULL) {
-				printf("Frame %lu: %s\n", i, names[i]);
-				if(load_object(frame, names[i]) < 0)
+				if(load_object(frame, names[i]) != 0) {
+					fprintf(stderr, "Frame [FAIL]: %lu - %s\n", i, names[i]);
 					continue;
+				}
 				vector_push_back(anim, frame);
+				fprintf(stderr, "Frame [DONE]: %lu - %s\n", i, names[i]);
 			}
 		}
+		for(size_t i = 0; i < vector_size(names); i++)
+			free(names[i]);
+		vector_free(names);
 	}
 	return anim;
 }

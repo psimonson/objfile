@@ -20,7 +20,7 @@
 #define FPS 60 // For regulating FPS
 
 static struct objfile *obj, *obj2, *obj3, **anim1;
-static int anim1_frame;
+static int anim_frame;
 
 /* Clean up all memory resources.
  */
@@ -61,8 +61,8 @@ void render_scene()
 {
 	extern struct objfile *obj, *obj2, *obj3, **anim1;
 
-	if(anim1_frame >= (int)vector_size(anim1))
-		anim1_frame = 0;
+	if(anim_frame >= (int)vector_size(anim1))
+		anim_frame = 0;
 
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -78,10 +78,10 @@ void render_scene()
 	draw_object(obj2);
 	glTranslatef(-5.0f, 0.0f, -20.0f);
 	draw_object(obj3);
-	glTranslatef(-3.0f, 0.0f, 0.0f);
 
 	/* draw anim1 */
-	draw_anim(anim1, anim1_frame);
+	glTranslatef(-3.0f, 0.0f, 0.0f);
+	draw_anim(anim1, anim_frame);
 
 	glutSwapBuffers();
 }
@@ -89,7 +89,7 @@ void render_scene()
  */
 void timer(int UNUSED(timer_id))
 {
-	anim1_frame++;
+	anim_frame++;
 	glutTimerFunc(100, timer, 0);
 	glutPostRedisplay();
 }
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 //	print_object(obj);
 //	print_object(obj2);
 //	print_object(obj3);
-	anim1 = load_anim("./anim", "cube_anim1");
+	anim1 = load_anim("./anim", "cube_anim1", SORTASC);
 	if(anim1 == NULL) {
 		fprintf(stderr, "Error: Cannot load anim1...\n");
 		cleanup();

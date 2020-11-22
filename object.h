@@ -13,6 +13,8 @@
 
 #include "export.h"
 
+enum { SORTASC, SORTDEC };
+
 struct vec3 {
 	float x;
 	float y;
@@ -62,7 +64,7 @@ PRS_EXPORT int load_object(struct objfile *obj, const char*);
 PRS_EXPORT void destroy_object(struct objfile*);
 PRS_EXPORT void draw_object(struct objfile*);
 PRS_EXPORT void print_object(struct objfile*);
-PRS_EXPORT struct objfile **load_anim(const char *dir, const char *anim_name);
+PRS_EXPORT struct objfile **load_anim(const char *dir, const char *anim_name, int mode);
 PRS_EXPORT void draw_anim(struct objfile **anim, int frame);
 PRS_EXPORT void destroy_anim(struct objfile **anim);
 
