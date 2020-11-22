@@ -1,33 +1,42 @@
-CFLAGS+=-std=c11 -Wall -Wextra -Werror -g $(shell pkg-config --cflags prs)
-LDFLAGS+=$(shell pkg-config --libs prs) -lGL -lGLU -lglut
+# Simple makefile for gcc written by stext editor.
+CC=gcc
+CFLAGS=-std=c11 -W -O -g
+CFLAGS+=$(shell pkg-config --cflags prs)
+LDFLAGS=-lglut -lGL -lGLU
+LDFLAGS+=$(shell pkg-config --libs prs)
 
-SRCDIR=$(shell pwd)
+BACKUPS=$(shell find . -iname "*.bak")
+SRCDIR=$(shell basename $(shell pwd))
+DESTDIR?=
+PREFIX?=usr
+VERSION=1.0
 
-VERSION=0.1
-BASENAM=$(shell basename $(SRCDIR))
-TARNAME=$(BASENAM)-$(VERSION).tgz
-
-SOURCE=$(shell find . -maxdepth 1 -iname '*.c')
-OBJECT=$(SOURCE:%.c=%.c.o)
+SOURCE=$(wildcard *.c)
+OBJECTS=$(SOURCE:%.c=%.c.o)
 TARGET=objfile
 
-.PHONY: all clean
+.PHONY: all install uninstall clean  distclean dist
 all: $(TARGET)
 
 %.c.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(TARGET): $(OBJECT)
-	$(CC) $(CFLAGS) -o $@ $(OBJECT) $(LDFLAGS)
+$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+install: all
+	install $(TARGET) $(DESTDIR)/$(PREFIX)/bin
+
+uninstall:
+	rm -f $(DESTDIR)/$(PREFIX)/bin/$(TARGET)
 
 clean:
-	rm -f *~ *.log $(OBJECT) $(TARGET)
+	rm -f $(OBJECTS) $(TARGET)
 
 distclean: clean
+ifneq ($(BACKUPS),)
 	rm -f *.bak
+endif
 
-dist:
-	@echo Compressing $(TARNAME)...
-	@cd .. && tar --exclude=.git -cf - ./$(BASENAM) | \
-	gzip -9 > ./$(TARNAME) && echo Compression done! || \
-	echo Compression failed.
+dist: distclean
+	cd .. && tar -cv --exclude=.git ./$(SRCDIR) | xz -9 > $(SRCDIR)-$(VERSION).tar.xz
