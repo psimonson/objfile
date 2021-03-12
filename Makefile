@@ -1,9 +1,9 @@
 # Simple makefile for gcc written by stext editor.
 CC=gcc
 CFLAGS=-std=c11 -W -O -g
-CFLAGS+=$(shell pkg-config --cflags prs)
+CFLAGS+=-Ilibprs/include
 LDFLAGS=-lglut -lGL -lGLU
-LDFLAGS+=$(shell pkg-config --libs prs)
+LDFLAGS+=libprs/build/libprs_static.a
 
 BACKUPS=$(shell find . -iname "*.bak")
 SRCDIR=$(shell basename $(shell pwd))
@@ -15,14 +15,20 @@ SOURCE=$(wildcard *.c)
 OBJECTS=$(SOURCE:%.c=%.c.o)
 TARGET=objfile
 
-.PHONY: all install uninstall clean  distclean dist
+.PHONY: all libprs install uninstall clean  distclean dist
 all: $(TARGET)
+
+libprs:
+ifneq ($(test -d libprs),1)
+	git clone https://github.com/psimonson/libprs.git
+	cd libprs && ./build.sh
+endif
 
 %.c.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+$(TARGET): libprs $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $(OBJECTS) $(LDFLAGS)
 
 install: all
 	install $(TARGET) $(DESTDIR)/$(PREFIX)/bin
@@ -34,6 +40,9 @@ clean:
 	rm -f $(OBJECTS) $(TARGET)
 
 distclean: clean
+ifneq ($(test -d libprs),1)
+	rm -rf libprs
+endif
 ifneq ($(BACKUPS),)
 	rm -f *.bak
 endif
